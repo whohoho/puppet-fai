@@ -147,7 +147,7 @@ class fai::common {
             nb_servers => '64'
         }
     }
-    # # Exports the FAI config space and the NFSROOT by NFS
+    # Exports the FAI config space and the NFSROOT by NFS
     nfs::server::export {
         [
          "${fai::configspacedir}",
@@ -284,10 +284,10 @@ class fai::common {
         # /srv/tftp/fai/
         if (! defined( File["${fai::tftpdir}"])) {
             file { "${fai::tftpdir}":
-                ensure => 'directory',
-                owner  => "${fai::params::configdir_owner}",
-                group  => "${fai::params::admingroup}",
-                mode   => "${fai::params::configdir_mode}",
+                ensure  => 'directory',
+                owner   => "${fai::params::configdir_owner}",
+                group   => "${fai::params::admingroup}",
+                mode    => "${fai::params::configdir_mode}",
                 require => [
                             Package['FAI'],
                             Group["${fai::params::admingroup}"]
@@ -352,8 +352,9 @@ class fai::common {
         }
 
         # Prepare the binary tools
-        if ($site in [ 'gaia-cluster', 'chaos-cluster']) {
-            file { "/root/bin/${site}-ipmi":
+       if ($site in [ 'gaia-cluster', 'chaos-cluster']) {
+            $clustername = regsubst($site, '/-cluster/', '')
+            file { "/root/bin/${clustername}-ipmi":
                 ensure  => "${fai::ensure}",
                 group   => "${fai::params::admingroup}",
                 mode    => '0755',
@@ -361,7 +362,7 @@ class fai::common {
                 require => File["/root/bin"]
             }
 
-            file { "/root/bin/${site}-update_fai":
+            file { "/root/bin/${clustername}-update_fai":
                 ensure => 'link',
                 target => "/root/${fai::configspace_provider}/${svn_path}/scripts/update_fai/trunk/update_fai"
             }
@@ -373,6 +374,12 @@ class fai::common {
                 content => template("fai/faiplay.erb"),
                 require => File["/root/bin"]
             }
+            file { "/root/bin/${clustername}-fai":
+                ensure  => 'link',
+                target  => "/root/bin/faiplay",
+                require => File["/root/bin/faiplay"]
+            }
+            
         }
 
     }

@@ -61,7 +61,7 @@ FAICHBOOT="/usr/sbin/fai-chboot"   # hard path (without which) as I want to use 
 
 DHCPD_LOG="/var/log/dhcpd.log"     # local log file for DHCPD to detect dhcpd offer to cluster nodes 
 
-SSH_AUTHORIZED_USER="<%= scope.lookupvar('sysadmin::login') %>"                # user recognized for SSH public key authentication on the installed nodes
+SSH_AUTHORIZED_USER="root"                # user recognized for SSH public key authentication on the installed nodes
 NODES=""                           # the nodes to consider for operation     - DO NOT MODIFY
 NODES_UNREACHABLE=""               # the nodes that can't be accessed by SSH - DO NOT MODIFY
 FIRST_NODE=""                      # the first node of ${NODES}              - DO NOT MODIFY
