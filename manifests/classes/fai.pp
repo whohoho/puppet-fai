@@ -19,9 +19,9 @@
 # $configspace_url:: *Default*: 'svn.gforge.uni.lu/svn/ulclusters/'.
 #           URL to access the config space
 # $debmirror:: Hostname of the server that provides the Debian mirror via NFS
-# $debmirror_exportdir:: *Default*: '/data/debmirror'. Export directory *on* the
+# $debmirror_exportdir:: *Default*: '/export/debmirror'. Export directory *on* the
 #           debmirror server.
-# $debmirror_mountdir:: *Default*: '/media/debmirror'. Local mount point where
+# $debmirror_mountdir:: *Default*: '/mnt/debmirror'. Local mount point where
 #           the mirror will be mounted
 # $debootstrap_suite:: *Default*: 'squeeze'. Suite (i.e.) distribution to be
 #           used to generate the FAI NFSroot directory, see make-fai-nfsroot(8)

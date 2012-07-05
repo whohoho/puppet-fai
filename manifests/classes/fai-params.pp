@@ -74,12 +74,12 @@ class fai::params {
     }
     # Export directory *on* the debmirror server that host the Debian mirror
     $debmirror_exportdir = $fai_debmirror_exportdir ? {
-        ''      => '/data/debmirror',
+        ''      => '/export/debmirror',
         default => "${fai_debmirror_exportdir}"        
     }
     # Local mount point where the mirror will be mounted 
     $debmirror_mountdir = $fai_debmirror_mountdir ? {
-        ''      => '/media/debmirror',
+        ''      => '/mnt/debmirror',
         default => "${fai_debmirror_mountdir}"        
     }
     
