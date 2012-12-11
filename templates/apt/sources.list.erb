@@ -17,6 +17,13 @@
 # Main packages - using the local Debian mirror mounted from <%= scope.lookupvar('fai::debmirror') %>
 deb	file:<%= scope.lookupvar('fai::debmirror_mountdir') %>/debian	<%= scope.lookupvar('fai::debootstrap_suite') %>   main contrib non-free
 
+<% if scope.lookupvar('fai::use_backports') == true -%>
+# Local Backports 
+deb file:<%= scope.lookupvar('fai::debmirror_mountdir') %>/debian-backports  <%= scope.lookupvar('fai::debootstrap_suite') %>-backports   main contrib non-free
+# Online version
+#deb http://backports.debian.org/debian-backports squeeze-backports main non-free contrib
+<% end -%>
+
 # Regular online repository
 #deb     http://ftp.fr.debian.org/debian/     <%= scope.lookupvar('fai::debootstrap_suite') %> main contrib non-free
 #deb-src http://ftp.fr.debian.org/debian/     <%= scope.lookupvar('fai::debootstrap_suite') %> main contrib non-free

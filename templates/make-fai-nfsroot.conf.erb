@@ -50,7 +50,7 @@ SSH_IDENTITY=<%= scope.lookupvar('fai::ssh_identity') %>
 
 # directory of hooks to be sourced at the end of make-fai-nfsroot,
 # i.e they have to be shell scripts.
-#NFSROOT_HOOKS=/etc/fai/nfsroot-hooks/
+NFSROOT_HOOKS=<%= scope.lookupvar('fai::nfsroot_hookdir') %>
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # following lines should be read only for most of you
