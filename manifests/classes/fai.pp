@@ -41,6 +41,9 @@
 # $logproto:: *Default*: 'ssh'. Set protocol type for saving logs.
 # $nfsrootdir:: *Default*: '/srv/fai/nfsroot'. Directory on the install server
 #           where the nfsroot for FAI is created, approx size: 390MB.
+# $nfsroot_hookdir:: *Default*: '/srv/fai/nfsroot-hooks'. Directory containing
+#           shell scripts to be sourced at the end of make-fai-nfsroot for
+#           additional configuration of the nfsroot. 
 # $rootpw_hash:: *Default*: '$1$kBnWcO.E$djxB128U7dMkrltJHPf6d1'.
 #           The encrypted (with md5 or crypt) root password on all install
 #           clients during installation process; used when log in via ssh;
@@ -82,6 +85,8 @@ class fai(
     $deploynode_maxindex   = 1,
     $configspacedir        = $fai::params::configspacedir,
     $nfsrootdir            = $fai::params::nfsrootdir,
+    $nfsroot_hookdir       = $fai::params::nfsroot_hookdir,
+    $nfsroot_kernelversion = $fai::params::nfsroot_kernelversion,
     $tftpdir               = $fai::params::tftpdir,
     $loguser               = $fai::params::loguser,
     $logproto              = $fai::params::logproto,
@@ -95,7 +100,9 @@ class fai(
     $rootpw_hash           = $fai::params::rootpw_hash,
     $ssh_identity          = $fai::params::ssh_identity,
     $allowed_clients       = $fai::params::allowed_clients,
-    $ipmiuser              = $fai::params::ipmiuser
+    $ipmiuser              = $fai::params::ipmiuser,
+    $use_backports         = $fai::params::use_backports,
+    $initramfs_modules     = $fai::params::initramfs_modules
 )
 inherits fai::params
 {
@@ -249,6 +256,42 @@ class fai::common {
                         Group["${fai::params::admingroup}"]
                         ]
         }
+        # /etc/fai/apt
+        file { "${fai::params::aptdir}":
+            ensure => 'directory',
+            owner  => "${fai::params::configdir_owner}",
+            group  => "${fai::params::admingroup}",
+            mode   => "${fai::params::configdir_mode}",
+            require => File["${fai::params::configdir}"]
+        }
+        # /etc/fai/apt/keys
+        file { "${fai::params::aptkeysdir}":
+            ensure => 'directory',
+            owner  => "${fai::params::configdir_owner}",
+            group  => "${fai::params::admingroup}",
+            mode   => "${fai::params::configdir_mode}",
+            recurse => true,
+            recurselimit => 1,
+            source  => "puppet:///modules/fai/apt/keys",
+            require => File["${fai::params::aptdir}"]
+        }
+        
+
+        
+        # /etc/fai/nfsroot_hooks
+        file { "${fai::params::nfsroot_hookdir}":
+            ensure  => 'directory',
+            owner   => "${fai::params::configdir_owner}",
+            group   => "${fai::params::admingroup}",
+            mode    => "${fai::params::configdir_mode}",
+            # recurse => true,
+            # recurselimit => 1,
+            # source  => "puppet:///modules/fai/nfsroot-hooks",
+            require => [
+                        File["${fai::params::configdir}"],
+                        File["${fai::params::nfsroot_configfile}"]
+                        ]
+        }
         # /srv/fai/config
         exec { "mkdir -p ${fai::configspacedir}":
             path    => [ '/bin', '/usr/bin' ],
@@ -339,7 +382,8 @@ class fai::common {
             owner   => "${fai::params::configfile_owner}",
             group   => "${fai::params::configfile_group}",
             mode    => "${fai::params::configfile_mode}",
-            source  => "puppet:///modules/fai/NFSROOT",
+            #source  => "puppet:///modules/fai/NFSROOT",
+            content => template("fai/NFSROOT.erb"),
             require => File["${fai::params::configdir}"]
         }
         file { "${fai::params::apt_sources}":
@@ -351,6 +395,15 @@ class fai::common {
             require => File["${fai::params::configdir}"]
         }
 
+        file { "${fai::params::nfsroot_hookdir}/patch-initrd":
+            ensure  => 'file',
+            owner   => "${fai::params::configdir_owner}",
+            group   => "${fai::params::admingroup}",
+            mode    => "${fai::params::configfile_mode}",
+            content => template("fai/nfsroot-hooks/patch-inird.erb"),
+            require => File["${fai::params::nfsroot_hookdir}"]
+        }
+        
         # Prepare the binary tools
        if ($site in [ 'gaia-cluster', 'chaos-cluster']) {
             $clustername = regsubst($site, '/-cluster/', '')

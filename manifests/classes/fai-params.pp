@@ -116,6 +116,19 @@ class fai::params {
         default => "${fai_ipmiuser}"
     }    
 
+    # Whether or not the backports package should be used
+    $use_backports = $fai_use_backports ? {
+        ''      => false,
+        default => $fai_use_backports
+    }
+
+    # List of the kernel modules to include in the NFSROOT initrd
+    $initramfs_modules = $fai_initramfs_modules ? {
+        ''      => [ 'bnx2' ],
+        default => $fai_initramfs_modules        
+    }
+    
+    
     #### MODULE INTERNAL VARIABLES  #########
     # (Modify to adapt to unsupported OSes)
     #######################################
@@ -162,6 +175,14 @@ class fai::params {
     $configdir = $::operatingsystem ? {
         default => "/etc/fai",
     }
+    # APT directory
+    $aptdir = $::operatingsystem ? {
+        default => "${fai::params::configdir}/apt",
+    }
+    $aptkeysdir = $::operatingsystem ? {
+        default => "${fai::params::aptdir}/keys",
+    }
+    
     $configspacedir = $::operatingsystem ? {
         default => '/srv/fai/config'
     }
@@ -195,6 +216,13 @@ class fai::params {
     $nfsroot_configfile = $::operatingsystem ? {
         default => '/etc/fai/NFSROOT',
     }
+    $nfsroot_hookdir = $::operatingsystem ? {
+        default => '/etc/fai/nfsroot-hooks',
+    }
+    $nfsroot_kernelversion = $::operatingsystem ? {
+        default => "${kernelversion}"
+    }
+
     $apt_sources = $::operatingsystem ? {
         default => '/etc/fai/apt/sources.list',
     }
