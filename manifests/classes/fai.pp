@@ -43,7 +43,7 @@
 #           where the nfsroot for FAI is created, approx size: 390MB.
 # $nfsroot_hookdir:: *Default*: '/srv/fai/nfsroot-hooks'. Directory containing
 #           shell scripts to be sourced at the end of make-fai-nfsroot for
-#           additional configuration of the nfsroot. 
+#           additional configuration of the nfsroot.
 # $rootpw_hash:: *Default*: '$1$kBnWcO.E$djxB128U7dMkrltJHPf6d1'.
 #           The encrypted (with md5 or crypt) root password on all install
 #           clients during installation process; used when log in via ssh;
@@ -275,9 +275,9 @@ class fai::common {
             source  => "puppet:///modules/fai/apt/keys",
             require => File["${fai::params::aptdir}"]
         }
-        
 
-        
+
+
         # /etc/fai/nfsroot_hooks
         file { "${fai::params::nfsroot_hookdir}":
             ensure  => 'directory',
@@ -352,7 +352,7 @@ class fai::common {
 
                 svn::checkout { "${svn_path}":
                     basedir => "/root/${fai::configspace_provider}",
-                    source  => 'svn+ssh://chaosadmin@svn.gforge.uni.lu/svn/ulclusters',
+                    source  => "${fai::configspace_url}",
                     require => File["/root/${fai::configspace_provider}"],
                     timeout => 60,
                 }
@@ -403,9 +403,9 @@ class fai::common {
             content => template("fai/nfsroot-hooks/patch-inird.erb"),
             require => File["${fai::params::nfsroot_hookdir}"]
         }
-        
+
         # Prepare the binary tools
-       if ($site in [ 'gaia-cluster', 'chaos-cluster']) {
+       if ($site in [ 'gaia-cluster', 'chaos-cluster', 'nyx-cluster']) {
             $clustername = regsubst($site, '/-cluster/', '')
             file { "/root/bin/${clustername}-ipmi":
                 ensure  => "${fai::ensure}",
@@ -432,7 +432,7 @@ class fai::common {
                 target  => "/root/bin/faiplay",
                 require => File["/root/bin/faiplay"]
             }
-            
+
         }
 
     }
