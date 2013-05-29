@@ -1,5 +1,5 @@
 name    'fai'
-version '0.1.2'
+version '0.1.3'
 source  'git-admin.uni.lu:puppet-repo.git'
 author  'Hyacinthe Cartiaux (hyacinthe.cartiaux@uni.lu)'
 license 'GPLv3'
