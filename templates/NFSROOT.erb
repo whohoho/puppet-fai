@@ -14,53 +14,48 @@
 # Package list for creating the NFSROOT
 
 PACKAGES aptitude
-nfs-common fai-nfsroot module-init-tools dhcp-client ssh rdate lshw portmap
+nfs-common fai-nfsroot module-init-tools ssh rdate lshw
 rsync lftp less dump reiserfsprogs e2fsprogs usbutils
 hwinfo psmisc pciutils hdparm smartmontools parted mdadm lvm2
-dnsutils ntpdate dosfstools jove xfsprogs xfsdump
-procinfo dialog discover vim
-console-tools console-common console-data
-expect iproute udev subversion git-core liblinux-lvm-perl
-live-initramfs
+dnsutils ntpdate dosfstools xfsprogs xfsdump
+procinfo numactl dialog
+console-tools console-common
+iproute udev subversion
+xz-utils
+cupt
+
+# some network cards needs firmware
+PACKAGES aptitude
+firmware-bnx2 firmware-bnx2x firmware-realtek
+
+# Additional packages
+PACKAGES aptitude
+dhcpcd
+discover vim
+expect git-core liblinux-lvm-perl
 zip unzip bzip2
-firmware-bnx2
-firmware-bnx2x
 gnupg debian-keyring
 
+PACKAGES aptitude
+<% if scope.lookupvar('fai::debootstrap_suite') == 'squeeze' -%>
+live-initramfs
+portmap
+<% else -%>
+PACKAGES aptitude
+dracut-network live-boot- live-boot-initramfs-tools-
+rpcbind
+<% end -%>
+
 # needed for the simple examples
+PACKAGES aptitude
 cfengine2 libapt-pkg-perl
 
 PACKAGES aptitude AMD64
-grub lilo
+grub read-edid
 <% if scope.lookupvar('fai::use_backports') == true -%>
 -t squeeze-backports
-firmware-bnx2
-firmware-bnx2x
 <% end  -%>
 linux-image-<%= scope.lookupvar('fai::nfsroot_kernelversion') %>
 
-
-PACKAGES aptitude I386
-# grub lilo read-edid
-# linux-image-486
-# packages for lenny:
-# linux-image-486 aufs-modules-2.6-486
-
-PACKAGES aptitude AMD64
-# grub lilo
-# linux-image-2.6-amd64
-# packages for lenny:
-# linux-image-2.6-amd64 aufs-modules-2.6-amd64
-
-PACKAGES aptitude IA64
-elilo gnu-efi efibootmgr
-
-PACKAGES aptitude SPARC
-silo sparc-utils
-
-PACKAGES aptitude ALPHA
-aboot
-
-PACKAGES aptitude POWERPC
-linux-image-2.6-powerpc
-yaboot
+# packages for Ubuntu natty/oneiric/precise:
+# linux-image-generic live-boot
