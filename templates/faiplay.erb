@@ -113,7 +113,7 @@ SYNOPSIS
 DESCRIPTION
     $COMMAND handle various task on this FAI server. More precisely, this script covers the following operations:
     - initializing the FAI configuration using fai-setup
-    - setting various configurations, including localdisk boot, partial partitionning of the disks during installation
+    - setting various configurations, including localdisk or pxe boot for installation
     - getting various configuration informations
     - launching the FAI installation of specified nodes
     - monitoring the installation process
@@ -150,9 +150,6 @@ OPTIONS
         -b | --boot-mode | boot-mode
                Get PXE boot configuration for the specified nodes. Use --all in place of node enumeration to select all the cluster nodes
 
-        -p | --partition-format | partition-format
-               Get the formatting configuration (either total or partial).
-
     monitor -d
     monitor -i    node1 node2...
     monitor -e    node1 node2...
@@ -175,7 +172,6 @@ OPTIONS
     reboot node1 node2...
             Force the reboot of the selected nodes. Use -r as a shortcut for this command.
 
-    set -p {total|partial}
     set [-r] -i node1 node2...
     set [-r] -l node1 node2...
             Set various configurations. The nodes affected by the configuration can be specified using integer shortcuts (see above).
@@ -192,13 +188,6 @@ OPTIONS
 
         -r | --reboot  | reboot
                Also reboot the nodes successfully configured
-
-        -p | --partition-format | partition-format
-               Specify the way the partitions will be formatted. Legitimate arguments are 'total' and 'partial'.
-               They have the following signification:
-               'partial': only the root partition / will be formatted during the FAI installation (the content of the
-                      other are preserved). This reduces the installation time but it supposes that the partition table is correct.
-               'total': all the partition are created and formatted. This is mandatory for the first installation.
 
     setup
         Lauch the fai-setup process to setup FAI according to the configuration files located in /etc/fai/
@@ -560,7 +549,7 @@ configure_PXE_boot() { # TODO factorize code with the previous function
         APPEND_KERNEL_PARAM=""
         [ -n "${LIVE_NETDEV}" ] && APPEND_KERNEL_PARAM="-k live-netdev=${LIVE_NETDEV}"
     #${FAICHBOOT} -IF ${VERBOSE} -s2.6.26-2-amd64 $node
-        ${FAICHBOOT} -P -IF ${VERBOSE} ${APPEND_KERNEL_PARAM} $node  
+        ${FAICHBOOT} -P -IF ${VERBOSE} ${APPEND_KERNEL_PARAM} $node
         local exit_status=$?
         if [ -z "${VERBOSE}" ]; then
             [ "$exit_status" -ne "0" ] && print_failed || print_ok
@@ -698,58 +687,6 @@ get_boot_mode() {
     done
 }
 
-####
-# get formatting mode -
-###
-get_format_mode() {
-    check_faiconfig_dir
-    local basedir="${FAI_CONFIG_DIR}/disk_config"
-    local dest="BULLX_B500"     # this file should link to one of the following files
-    local dest_total="${dest}.total_format"
-    local dest_partial="${dest}.partial_format"
-    local state="${COLOR_RED}UNKNOWN${COLOR_BACK}"
-    [ -z "`diff $basedir/${dest} $basedir/${dest_total}`" ]   && state="${COLOR_RED}total${COLOR_BACK}"
-    [ -z "`diff $basedir/${dest} $basedir/${dest_partial}`" ] && state="${COLOR_GREEN}partial${COLOR_BACK}"
-    info "disk formatting configuration during installation: $state"
-}
-
-#####
-# change options for the disk formating during the installation
-# usage: set_diskformat total     -> all partitions will be recreated and erased
-#        set_diskformat partial   -> assume the partitions have been correctly create and erase only the root partition
-###
-set_diskformat() {
-    check_faiconfig_dir
-    local basedir="${FAI_CONFIG_DIR}/disk_config"
-    local dest="BULLX_B500"
-    [ ! -f "$basedir/$dest" ] && print_error_and_exit "Unable to access $dest"
-    local src=$dest
-    # Check current mode
-    local tmp=`diff $basedir/$dest $basedir/${dest}.total_format`
-    local current="partial"  # current mode
-    if [ -z "$tmp" ]; then
-    # current config: total format
-        warning "[$FUNCNAME] Current configuration: ALL partition created and TOTAL formatting"
-        current="total"
-    else
-        warning "[$FUNCNAME] Current configuration: NO partition created and PARTIAL formatting (only the root partition)"
-    fi
-
-    case $1 in
-        total)   src="${dest}.total_format";;
-        partial) src="${dest}.partial_format";;
-        *) print_error_and_exit "[$FUNCNAME] Bad argument"
-    esac
-    [ ! -f "$basedir/$src" ] && print_error_and_exit "Unable to access $src"
-    [ "$current" == "$1" ] && info "Current configuration: $current => no modification to be done" && return
-    warning "You are about to switch from ${COLOR_RED}$current${COLOR_BACK} to ${COLOR_RED}$1${COLOR_BACK} formatting configuration"
-    really_continue
-    cd $basedir
-    ln -sf $src $dest
-    cd - 1>/dev/null
-    info "check config:"
-    ls -l --color $basedir/${dest}*
-}
 
 ####
 # launch fai-setup
@@ -896,7 +833,6 @@ cleanssh() {
 status() {
     local node_list=${NODES}
     [ -n "$1" ] && node_list="$1"
-    get_format_mode
     for node in $node_list; do
         echo && title "state information on $node"
         get_boot_mode            $node
@@ -948,16 +884,9 @@ set_config() {
             -i | --install | install)     function="configure_PXE_boot";;
             -l | --localboot | localboot) function="configure_localdisk_boot";;
             --bcs) LIVE_NETDEV="eth0";;
-            --live-netdev) 
+            --live-netdev)
                 shift;
-                LIVE_NETDEV="$1";; 
-            -p | --partition-format | partition-format)
-                shift
-                case $1 in
-                    total)   set_diskformat total;   exit 0;;
-                    partial) set_diskformat partial; exit 0;;
-                    *) print_error_and_exit "[$FUNCNAME] unknown formatting option";;
-                esac;;
+                LIVE_NETDEV="$1";;
             *)  [ -z "$function" ] && print_error_and_exit "[$FUNCNAME] unknown get option";
                 configure_nodes_variable $@
         esac
@@ -982,7 +911,6 @@ get_config() {
             --all)          NODES="${ALL_CLUSTER_NODES}";;
             -v | --verbose) VERBOSE="-v";;
             -b | --boot-mode | boot-mode)  function="get_boot_mode";;
-            -p | --partition-format | partition-format) get_format_mode; exit 0;;
             *)  [ -z "$function" ] && print_error_and_exit "[$FUNCNAME] unknown get option";
                 configure_nodes_variable $@
         esac
