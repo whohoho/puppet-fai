@@ -42,7 +42,7 @@ COLOR_CYAN="\033[0;36m"
 COLOR_BOLD="\033[1m"
 COLOR_BACK="\033[0m"
 
-SITE=chaos.lu
+SITE=chaos
 
 if [ "$COMMAND" != "update_fai" ]; then
     # by convention, name should be prefixed by sitename_update_fai
@@ -50,40 +50,19 @@ if [ "$COMMAND" != "update_fai" ]; then
     SITE=`echo $COMMAND | cut -d '_' -f 1`
 fi
 
-echo " ---- configure FAI and serveur config on the site $SITE ---"
+echo " ---- configure FAI and server config on the site $SITE ---"
 
 ### Local variables
 FAI_FILE_OWNER=root                        # file owner
 FAI_FILE_GROUP=faiadmin                    # file group
-FAI_SVN=/root/svn/ulclusters               # local working copy of the repository
+FAI_SRC=/root/svn/ulclusters               # local working copy of the repository
 
+SRC_FAI_CONFIGDIR=${FAI_SRC}/FAI/config    # FAI source dir
 FAI_CONFIGDIR=/srv/fai/config              # FAI config dir
-FAI_ETC=/etc/fai                           # FAI etc files
-BIND_CONFDIR=/etc/bind                     # DNS server (aka bind) configuration
-LDAP_CONFDIR=/etc/ldap                     # LDAP etc files
-GANGLIA_CONFDIR=/etc/ganglia               # Ganglia Monitoring System
 
 
-
-SVN_FAI_CONFIGDIR=${FAI_SVN}/FAI/config
-SVN_FAI_ETC=${FAI_SVN}/sites/${SITE}/fai
-SVN_BIND_CONFDIR=${FAI_SVN}/sites/${SITE}/bind
-SVN_GANGLIA_CONFDIR=${FAI_SVN}/sites/${SITE}/ganglia
-SVN_LDAP_CONFDIR=${FAI_SVN}/sites/${SITE}/ldap
-
-#case $SITE in
-#   gaia-cluster)
-#    dst_array=(${FAI_CONFIGDIR}     ${FAI_ETC}     );
-#    src_array=(${SVN_FAI_CONFIGDIR} ${SVN_FAI_ETC} );;
-#   *)
-#    dst_array=(${FAI_CONFIGDIR}     ${FAI_ETC}     ${BIND_CONFDIR}     ${LDAP_CONFDIR}    );
-#    src_array=(${SVN_FAI_CONFIGDIR} ${SVN_FAI_ETC} ${SVN_BIND_CONFDIR} ${SVN_LDAP_CONFDIR});;
-#esac
-case $SITE in
-   *)
-    dst_array=(${FAI_CONFIGDIR}      );
-    src_array=(${SVN_FAI_CONFIGDIR}  );;
-esac
+dest_dir=$FAI_CONFIGDIR
+src_dir=$SRC_FAI_CONFIGDIR
 
 
 #######################
@@ -109,7 +88,7 @@ print_help() {
     cat <<EOF
 NAME
         $COMMAND -- synchronize the local FAI confoguration (mainly /etc/fai and
-        /srv/fai/config) from the latest working copy of the svn repository.
+        /srv/fai/config) from the latest working copy of the config repository.
 
 SYNOPSIS
         $COMMAND [-V | -h]
@@ -231,13 +210,8 @@ check_bin() {
 print_local_variables() {
     echo "FAI_FILE_OWNER = ${FAI_FILE_OWNER}"
     echo "FAI_FILE_GROUP = ${FAI_FILE_GROUP}"
-    echo "FAI_SVN        = ${FAI_SVN}"
+    echo "FAI_SRC        = ${FAI_SRC}"
     echo "FAI_CONFIGDIR  = ${FAI_CONFIGDIR}"
-    echo "FAI_ETC        = ${FAI_ETC}"
-    echo "SVN_FAI_CONFIGDIR = ${SVN_FAI_CONFIGDIR}"
-    echo "SVN_FAI_ETC    = ${SVN_FAI_ETC}"
-    echo "LDAP_CONFDIR   = ${LDAP_CONFDIR}"
-    echo "SVN_LDAP_CONFDIR = ${SVN_LDAP_CONFDIR}"
 }
 
 
@@ -267,28 +241,18 @@ while [ $# -ge 1 ]; do
 done
 
 
-info "update local copy of the SVN repository (in ${FAI_SVN})"
-execute "pushd ${FAI_SVN}"
-execute "svn update"
+info "update local copy of the FAI configuration repository (in ${FAI_SRC})"
+execute "pushd ${FAI_SRC}"
+[ -d "${FAI_SRC}/.svn" ] && execute "svn update"
+[ -d "${FAI_SRC}/.git" ] && execute "git pull"
 execute "popd"
 
-# info "synchronizing files in ${FAI_CONF}/"
-# execute "rsync -avzu -L --exclude='.svn' ${SVN_FAI_CONFIGDIR}/ ${FAI_CONFIGDIR}/"
-
-for (( idx = 0 ; idx < ${#dst_array[@]} ; idx++ ))
-do
-    dir=${dst_array[$idx]}
-    svn_dir=${src_array[$idx]}
-    [ -z "$dir" ]     && print_error_and_exit "EMPTY dir variable"
-    [ -z "$svn_dir" ] && print_error_and_exit "EMPTY svn_dir variable"
-    info "synchronizing files from the SVN repository $svn_dir in $dir"
-    really_continue
-    RSYNC_NO_LINK=''
-    [ "$dir" == "${FAI_ETC}" ] && RSYNC_NO_LINK='-L'
-    execute "rsync -avz ${RSYNC_MODE} ${RSYNC_NO_LINK} --exclude '.svn*' $svn_dir/ $dir/"
-done
+[ -z "$dest_dir" ]     && print_error_and_exit "EMPTY dest_dir variable"
+[ -z "$src_dir" ] && print_error_and_exit "EMPTY src_dir variable"
+info "synchronizing files from the FAI configuration repository $src_dir in $dest_dir"
+really_continue
+execute "rsync -avz ${RSYNC_MODE} --exclude '.git' --exclude '.svn*' $src_dir/ $dest_dir/"
 
 # Update rights on the conf directory  bind directory
 execute "chown -R ${FAI_FILE_OWNER}:${FAI_FILE_GROUP} ${FAI_CONFIGDIR}"
-execute "chown -R ${FAI_FILE_OWNER}:${FAI_FILE_GROUP} ${FAI_ETC}"
 
