@@ -416,8 +416,11 @@ class fai::common {
             }
 
             file { "/root/bin/${clustername}-update_fai":
-                ensure => 'link',
-                target => "/root/${fai::configspace_provider}/${svn_path}/scripts/update_fai/trunk/update_fai"
+                ensure  => "${fai::ensure}",
+                group   => "${fai::params::admingroup}",
+                mode    => '0755',
+                content => template("fai/update-fai.erb"),
+                require => File["/root/bin"]
             }
 
             file { "/root/bin/faiplay":
