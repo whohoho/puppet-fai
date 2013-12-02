@@ -112,7 +112,7 @@ inherits fai::params
         fail("fai 'ensure' parameter must be set to either 'absent' or 'present'")
     }
 
-    if ! ($configspace_provider in [ 'svn' ]) {
+    if ! ($configspace_provider in [ 'svn', 'git' ]) {
         fail("Unsupported provider '${configspace_provider} for the FAI configuration space")
     }
 
@@ -355,6 +355,17 @@ class fai::common {
                     source  => "${fai::configspace_url}",
                     require => File["/root/${fai::configspace_provider}"],
                     timeout => 60,
+                }
+            }
+            git: {
+                include git
+                $git_path = gsub($fai::configspace_url, '.*\/', '')
+
+                git::clone { "${git_path}":
+                    basedir => "/root/${fai::configspace_provider}",
+                    source  => "${fai::configspace_url}",
+                    branch  => '',
+                    require => File["/root/${fai::configspace_provider}"],
                 }
             }
             default: { err ( "Unsupported provider for fai: '${fai::configspace_provider}'" ) }
