@@ -75,6 +75,8 @@ MODE_CHECKSSH=""                   # only check reachability of ${NODES} by SSH 
 MODE_INSTALL=""                    # install the nodes listed by ${NODES} using FAI
 MODE_STATUS=""                     # get state info on the nodes
 
+FORCE=""
+
 ### various info on cluster nodes ###
 CLUSTERNODES_BASEHOSTNAME="<%= scope.lookupvar('fai::deploynode_basename') %>"  # common prefix for the hostname of all nodes in the cluster
 ALL_CLUSTER_NODES=`seq -s " " -f "${CLUSTERNODES_BASEHOSTNAME}%g" <%= scope.lookupvar('fai::deploynode_minindex') %> <%= scope.lookupvar('fai::deploynode_maxindex') %>`
@@ -520,6 +522,7 @@ check_nodes_availability() {
 #          configure_localdisk_boot  node -> perform action only on node
 ###
 configure_localdisk_boot() {
+    MODE_SOFTREBOOT="yes"    # Force (eventually) soft reboot even if not precised by command line
     local node_to_configure=${NODES}
     [ -n "$1" ] && node_to_configure="$1"
     for node in $node_to_configure; do
@@ -590,12 +593,26 @@ install() {
 ###
 reboot() {
     local node_to_reboot=${NODES}
-    [ -n "$1" ] && node_to_reboot="$1"
+    while [ $# -ge 1 ]; do
+        case $1 in
+            -h | --help)    print_help;        exit 0;;
+            -V | --version) print_version;     exit 0;;
+            -s | --softmod) MODE_SOFTREBOOT="--soft";;
+            -f | --force)   FORCE="--force";; 
+            --debug)        DEBUG="--debug";;
+            *) node_to_reboot="$1"
+        esac
+        shift
+    done
+    go_for_ipmi=""
     if [ -z "${MODE_SOFTREBOOT}" ]; then
         really_continue "IPMI will be used to reboot the selected nodes"
+        go_for_ipmi="yes"
     fi
+    # debug "force mode = ${FORCE}"
+    # debug "go_for_ipmi = ${go_for_ipmi}"
     for node in $node_to_reboot; do
-        [ -z "${FORCE_MODE}" ] && [ -z "${MODE_INSTALL}" ] && really_continue "You are about to ${COLOR_BOLD}force reboot${COLOR_BACK} on $node"
+        [ -z "${FORCE}" ] && really_continue "You are about to ${COLOR_BOLD}force reboot${COLOR_BACK} on $node"
         if [ -n "${MODE_SOFTREBOOT}" ]; then
             echo -n -e "=> rebooting ${COLOR_BOLD}$node${COLOR_BACK} \t"
             remote_execute $node shutdown -r now
@@ -603,9 +620,10 @@ reboot() {
             [ "$status" -ne "0" ] && print_failed || print_ok
             if [ "$status" -ne "0" ]; then
                 really_continue "Do you want to use IPMI to ${COLOR_BOLD}force the reboot${COLOR_BACK} of the node $node"
+                go_for_ipmi="yes"
             fi
         fi
-        ipmi_reboot $node
+        [ -n "${go_for_ipmi}" ] && ipmi_reboot $node || echo "not rebooting by IPMI"
     done
 }
 
@@ -882,10 +900,12 @@ set_config() {
         case $1 in
             -h | --help)    print_help;        exit 0;;
             -V | --version) print_version;     exit 0;;
+            -f | --force)   FORCE="--force";;
             --debug)        DEBUG="--debug";;
             --all)          NODES="${ALL_CLUSTER_NODES}";;
             -v | --verbose) VERBOSE="-v";;
             -r | --reboot | reboot )      MODE_REBOOT="--reboot";;
+            -s | --softmod)           MODE_SOFTREBOOT="--soft";;
             -i | --install | install)     function="configure_PXE_boot";;
             -l | --localboot | localboot) function="configure_localdisk_boot";;
             --bcs) LIVE_NETDEV="eth0";;
@@ -937,7 +957,7 @@ get_config() {
 while [ $# -ge 1 ]; do
     case $1 in
         # General options
-        -f | --force)   FORCE_MODE="--force";;
+        -f | --force)   FORCE="--force";;
         --debug)        DEBUG="--debug";;
         --all)          NODES="${ALL_CLUSTER_NODES}";;
         -h | --help)    print_help;        exit 0;;
@@ -961,7 +981,7 @@ while [ $# -ge 1 ]; do
         -r | --reboot  | reboot ) MODE_REBOOT="--reboot";;
         -s | --softmod)           MODE_SOFTREBOOT="--soft";;
         -c | --check-ssh)         MODE_CHECKSSH="--check-ssh";;
-        *)  configure_nodes_variable "$@"; break;;
+        *) configure_nodes_variable "$@"; break;;
     esac
     shift
 done
