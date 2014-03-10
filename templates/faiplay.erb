@@ -70,6 +70,7 @@ LIVE_NETDEV=""                     # Don't set the net dev interface
 
 # Operation modes
 MODE_REBOOT=""                     # reboot the nodes listed in ${NODES}
+MODE_SOFTREBOOT=""                 # reboot in softmod (use IPMI by default)
 MODE_CHECKSSH=""                   # only check reachability of ${NODES} by SSH for the user ${SSH_AUTHORIZED_USER}
 MODE_INSTALL=""                    # install the nodes listed by ${NODES} using FAI
 MODE_STATUS=""                     # get state info on the nodes
@@ -169,11 +170,11 @@ OPTIONS
             -e | --errors  | errors
                Monitor remote FAI installation error.
 
-    reboot node1 node2...
-            Force the reboot of the selected nodes. Use -r as a shortcut for this command.
+    reboot [-s] node1 node2...
+            Force the reboot (in softmod with -s) of the selected nodes. Use -r as a shortcut for this command.
 
-    set [-r] -i node1 node2...
-    set [-r] -l node1 node2...
+    set [-r] [-s] -i node1 node2...
+    set [-r] [-s] -l node1 node2...
             Set various configurations. The nodes affected by the configuration can be specified using integer shortcuts (see above).
         Use --all in place of node enumeration to select all the cluster nodes
         Available options are the following:
@@ -188,6 +189,7 @@ OPTIONS
 
         -r | --reboot  | reboot
                Also reboot the nodes successfully configured
+               COmbined with -s to have a softmod reboot rather than the default ipmi reboot
 
     setup
         Lauch the fai-setup process to setup FAI according to the configuration files located in /etc/fai/
@@ -226,7 +228,7 @@ info() {
     [ -n "$text" ] && text="${title:==>} $text"
     #echo -en $text
     echo -e $text
-   # echo -en \\033[${PRINT_WIDTH}G
+    # echo -en \\033[${PRINT_WIDTH}G
 }
 
 #####
@@ -434,7 +436,7 @@ configure_nodes_variable() {
     if [ -n "$tmp" ]; then
         local start=`echo $tmp | cut -d - -f 1`
         local end=`echo $tmp | cut -d - -f 2`
-    #NODES=`seq -s " " -f "${CLUSTERNODES_BASEHOSTNAME}%02g" $start $end`
+        #NODES=`seq -s " " -f "${CLUSTERNODES_BASEHOSTNAME}%02g" $start $end`
         NODES=`seq -s " " -f "${CLUSTERNODES_BASEHOSTNAME}%g" $start $end`
     else
         tmp=`echo $* | grep -e "^[[:digit:]]"`
@@ -473,8 +475,8 @@ check_FAI_process() {
         remote_execute $node "ls ${FAI_LOGDIR}/fai.log" &>/dev/null
         if [ "$?" -ne "0" ]; then
             node_state="installed and rebooted on the new system"
-        # go deeper into the analysis of this issue:
-        # if the node belongs to ${NODES_UNREACHABLE}, then it is unreacheable
+            # go deeper into the analysis of this issue:
+            # if the node belongs to ${NODES_UNREACHABLE}, then it is unreacheable
             [ -n "`echo ${NODES_UNREACHABLE} | grep $node`" ] && node_state="${COLOR_RED}UNREACHABLE${COLOR_BACK}"
         else node_state="FAI processing"
         fi
@@ -492,10 +494,10 @@ check_nodes_availability() {
     [ -n "$1" ] && node_to_check="$1"
     for node in $node_to_check; do
         echo -n -e "=> check SSH access to $node \t"
-    #remote_execute $node ls -l $HOME &>/dev/null
+        #remote_execute $node ls -l $HOME &>/dev/null
         remote_execute $node hostname &>/dev/null
         if [ "$?" -ne "0" ]; then
-        # can't access to the node by SSH: remove this node from ${NODES} and add it to ${NODES_UNREACHABLE}
+            # can't access to the node by SSH: remove this node from ${NODES} and add it to ${NODES_UNREACHABLE}
             NODES_UNREACHABLE="${NODES_UNREACHABLE} $node"
             NODES=`echo ${NODES} | sed -e "s/$node//"`
             set_head_node
@@ -548,7 +550,7 @@ configure_PXE_boot() { # TODO factorize code with the previous function
         [ -n "${VERBOSE}" ] && echo
         APPEND_KERNEL_PARAM=""
         [ -n "${LIVE_NETDEV}" ] && APPEND_KERNEL_PARAM="-k live-netdev=${LIVE_NETDEV}"
-    #${FAICHBOOT} -IF ${VERBOSE} -s2.6.26-2-amd64 $node
+        #${FAICHBOOT} -IF ${VERBOSE} -s2.6.26-2-amd64 $node
         ${FAICHBOOT} -P -IF ${VERBOSE} ${APPEND_KERNEL_PARAM} $node
         local exit_status=$?
         if [ -z "${VERBOSE}" ]; then
@@ -589,18 +591,21 @@ install() {
 reboot() {
     local node_to_reboot=${NODES}
     [ -n "$1" ] && node_to_reboot="$1"
+    if [ -z "${MODE_SOFTREBOOT}" ]; then
+        really_continue "IPMI will be used to reboot the selected nodes"
+    fi
     for node in $node_to_reboot; do
         [ -z "${FORCE_MODE}" ] && [ -z "${MODE_INSTALL}" ] && really_continue "You are about to ${COLOR_BOLD}force reboot${COLOR_BACK} on $node"
-        echo -n -e "=> rebooting ${COLOR_BOLD}$node${COLOR_BACK} \t"
-        remote_execute $node shutdown -r now
-        status=$?
-        [ "$status" -ne "0" ] && print_failed || print_ok
-        if [ "$status" -ne "0" ]; then
-            really_continue "Do you want to use IPMI to ${COLOR_BOLD}force the reboot${COLOR_BACK} of the node $node"
-            echo -n -e "=> rebooting (via IPMI) ${COLOR_BOLD}$node${COLOR_BACK} \t"
-            ipmi_reboot $node
-        #[ "$?" -ne "0" ] && print_failed || print_ok
+        if [ -n "${MODE_SOFTREBOOT}" ]; then
+            echo -n -e "=> rebooting ${COLOR_BOLD}$node${COLOR_BACK} \t"
+            remote_execute $node shutdown -r now
+            status=$?
+            [ "$status" -ne "0" ] && print_failed || print_ok
+            if [ "$status" -ne "0" ]; then
+                really_continue "Do you want to use IPMI to ${COLOR_BOLD}force the reboot${COLOR_BACK} of the node $node"
+            fi
         fi
+        ipmi_reboot $node
     done
 }
 
@@ -620,7 +625,7 @@ sshconnect_to() {
             cmd="sudo -u ${SSH_AUTHORIZED_USER}"
         fi
         cmd="$cmd ssh -o 'PasswordAuthentication=no' -o 'StrictHostKeyChecking=no' root@${node}"
-#   local cmd="sudo -u ${SSH_AUTHORIZED_USER} ssh -o 'PasswordAuthentication=no' root@$node"
+        #   local cmd="sudo -u ${SSH_AUTHORIZED_USER} ssh -o 'PasswordAuthentication=no' root@$node"
         debug "[$FUNCNAME] $cmd"
         trap "echo -n ''" SIGINT     # trap ssh exit
         eval $cmd
@@ -673,12 +678,12 @@ get_boot_mode() {
         local pxe_configfile="${FAI_TFTP_DIR}/pxelinux.cfg/$node_ip_hex"
         debug "@ IP for $node: $node_ip (in hexa: $node_ip_hex) - PXE config file: $pxe_configfile"
         local state="${COLOR_RED}UNKNOWN${COLOR_BACK}"
-    # first check if a configuration file exists
+        # first check if a configuration file exists
         [ ! -f "$pxe_configfile" ] && state="${COLOR_RED}NO CONFIG FOUND${COLOR_BACK}"
-    # then check for localboot
+        # then check for localboot
         local check_localboot=`grep localboot $pxe_configfile 2>/dev/null`
         [ -n "$check_localboot" ]  && state="${COLOR_GREEN}$check_localboot${COLOR_BACK}"
-    # finally check for install
+        # finally check for install
         local kernel=`grep kernel $pxe_configfile 2>/dev/null | cut -d ' ' -f 2`
         local fai_action=`grep FAI_ACTION $pxe_configfile 2>/dev/null`
         [ -n "$kernel" -a -n "$fai_action" ] && state="${COLOR_CYAN}install $kernel${COLOR_BACK}"
@@ -931,7 +936,7 @@ get_config() {
 # Check for options
 while [ $# -ge 1 ]; do
     case $1 in
-    # General options
+        # General options
         -f | --force)   FORCE_MODE="--force";;
         --debug)        DEBUG="--debug";;
         --all)          NODES="${ALL_CLUSTER_NODES}";;
@@ -939,9 +944,9 @@ while [ $# -ge 1 ]; do
         -V | --version) print_version;     exit 0;;
         -v | --verbose) VERBOSE="-v";;
 
-    # Specific options
+        # Specific options
         cleanssh)  cleanssh; exit 0;;
-#   command)    shift; configure_nodes_variable $1;
+        #   command)    shift; configure_nodes_variable $1;
         get)        shift; get_config $@;       exit 0;; # get various configuration information
         set)        shift; set_config $@;       exit 0;; # configure the way the nodes boot, are formatted etc.
         setup)      fai_setup;                  exit 0;; # FAI setup
@@ -954,6 +959,7 @@ while [ $# -ge 1 ]; do
         -m | --monitor | monitor) shift; monitor $@;          exit 0;; # monitor logs during FAI operations
         -i | --install | install) MODE_INSTALL="--install";;
         -r | --reboot  | reboot ) MODE_REBOOT="--reboot";;
+        -s | --softmod)           MODE_SOFTREBOOT="--soft";;
         -c | --check-ssh)         MODE_CHECKSSH="--check-ssh";;
         *)  configure_nodes_variable "$@"; break;;
     esac
