@@ -40,8 +40,8 @@ class fai::params {
     $allowed_clients = $fai_allowed_clients ? {
         ''      => '*',
         default => "${fai_allowed_clients}"
-    } 
-    
+    }
+
     # Account on the install server which saves all log-files and which can
     # change the kernel that is booted via network.
     # Define it, to enable it.
@@ -60,7 +60,7 @@ class fai::params {
         ''      => 'svn',
         default => "${fai_configspace_provider}"
     }
-    
+
     # URL to access the config space
     $configspace_url = $fai_configspace_provider ? {
         ''      => 'svn.gforge.uni.lu/svn/ulclusters/',
@@ -70,29 +70,29 @@ class fai::params {
     # Hostname (or IP) of the server that provides the Debian mirror via NFS
     $debmirror = $fai_debmirror ? {
         ''      => 'debmirror',
-        default => "${fai_debmirror}"        
+        default => "${fai_debmirror}"
     }
     # Export directory *on* the debmirror server that host the Debian mirror
     $debmirror_exportdir = $fai_debmirror_exportdir ? {
         ''      => '/export/debmirror',
-        default => "${fai_debmirror_exportdir}"        
+        default => "${fai_debmirror_exportdir}"
     }
-    # Local mount point where the mirror will be mounted 
+    # Local mount point where the mirror will be mounted
     $debmirror_mountdir = $fai_debmirror_mountdir ? {
         ''      => '/mnt/debmirror',
-        default => "${fai_debmirror_mountdir}"        
+        default => "${fai_debmirror_mountdir}"
     }
-    
+
     # Suite (i.e.) distribution to be used to generate the FAI NFSroot directory
-    # cf make-fai-nfsroot(8) 
+    # cf make-fai-nfsroot(8)
     $debootstrap_suite = $fai_debootstrap_suite ? {
         ''      => 'squeeze',
-        default => "${fai_debootstrap_suite}"        
+        default => "${fai_debootstrap_suite}"
     }
     # Options to be passed to debootstrap -- see make-fai-nfsroot(8).
     $debootstrap_opts = $fai_debootstrap_opts ? {
         ''      => '--include=gnupg --exclude=dhcp-client,info --arch amd64',
-        default => "${fai_debootstrap_opts}"        
+        default => "${fai_debootstrap_opts}"
     }
 
     # The encrypted (with md5 or crypt) root password on all install clients
@@ -104,9 +104,9 @@ class fai::params {
     }
 
     # SSH identity file: this user can log to the install clients in as root
-    # without a password; 
+    # without a password;
     $ssh_identity = $fai_ssh_identity ? {
-        ''      => '/root/.ssh/id_dsa.pub', 
+        ''      => '/root/.ssh/id_dsa.pub',
         default => "${fai_ssh_identity}"
     }
 
@@ -114,7 +114,7 @@ class fai::params {
     $ipmiuser = $fai_ipmiuser ? {
         ''      => 'administrator',
         default => "${fai_ipmiuser}"
-    }    
+    }
 
     # Whether or not the backports package should be used
     $use_backports = $fai_use_backports ? {
@@ -125,10 +125,10 @@ class fai::params {
     # List of the kernel modules to include in the NFSROOT initrd
     $initramfs_modules = $fai_initramfs_modules ? {
         ''      => [ 'bnx2' ],
-        default => $fai_initramfs_modules        
+        default => $fai_initramfs_modules
     }
-    
-    
+
+
     #### MODULE INTERNAL VARIABLES  #########
     # (Modify to adapt to unsupported OSes)
     #######################################
@@ -142,7 +142,7 @@ class fai::params {
     $admingroup = $::operatingsystem ? {
         default => 'faiadmin'
     }
-    
+
     # Log directory
     $logdir = $::operatingsystem ? {
         default => '/var/log/fai'
@@ -182,7 +182,7 @@ class fai::params {
     $aptkeysdir = $::operatingsystem ? {
         default => "${fai::params::aptdir}/keys",
     }
-    
+
     $configspacedir = $::operatingsystem ? {
         default => '/srv/fai/config'
     }
@@ -195,7 +195,7 @@ class fai::params {
     $tftpdir = $::operatingsystem ? {
         default => '/srv/tftp/fai'
     }
-    
+
     $configdir_mode = $::operatingsystem ? {
         default => '0755',
     }
@@ -226,7 +226,7 @@ class fai::params {
     $apt_sources = $::operatingsystem ? {
         default => '/etc/fai/apt/sources.list',
     }
-    
+
     $configfile_mode = $::operatingsystem ? {
         default => '0600',
     }
@@ -237,5 +237,8 @@ class fai::params {
         default => "${admingroup}",
     }
 
+    $hookfile_mode = $::operatingsystem ? {
+        default => '0755',
+    }
 }
 

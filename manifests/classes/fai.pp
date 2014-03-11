@@ -410,13 +410,21 @@ class fai::common {
             ensure  => 'file',
             owner   => "${fai::params::configdir_owner}",
             group   => "${fai::params::admingroup}",
-            mode    => "${fai::params::configfile_mode}",
+            mode    => "${fai::params::hookfile_mode}",
             content => template("fai/nfsroot-hooks/patch-inird.erb"),
+            require => File["${fai::params::nfsroot_hookdir}"]
+        }
+        file { "${fai::params::nfsroot_hookdir}/blacklist-module":
+            ensure  => 'file',
+            owner   => "${fai::params::configdir_owner}",
+            group   => "${fai::params::admingroup}",
+            mode    => "${fai::params::hookfile_mode}",
+            content => template("fai/nfsroot-hooks/blacklist-module.erb"),
             require => File["${fai::params::nfsroot_hookdir}"]
         }
 
         # Prepare the binary tools
-       if ($site in [ 'gaia-cluster', 'chaos-cluster', 'nyx-cluster']) {
+        if ($site in [ 'gaia-cluster', 'chaos-cluster', 'nyx-cluster']) {
             $clustername = regsubst($site, '/-cluster/', '')
             file { "/root/bin/${clustername}-ipmi":
                 ensure  => "${fai::ensure}",
