@@ -598,7 +598,7 @@ reboot() {
             -h | --help)    print_help;        exit 0;;
             -V | --version) print_version;     exit 0;;
             -s | --softmod) MODE_SOFTREBOOT="--soft";;
-            -f | --force)   FORCE="--force";; 
+            -f | --force)   FORCE="--force";;
             --debug)        DEBUG="--debug";;
             *) node_to_reboot="$1"
         esac
@@ -720,7 +720,11 @@ fai_setup() {
 
     echo && title "Setup FAI"
     #fai-setup $verbose 2>&1 | tee $fai_setup_log
+<% if @lsbdistcodename == 'squeeze' -%>
     fai-setup ${VERBOSE}
+<% else -%>
+    fai-setup -f ${VERBOSE}
+<% end -%>
     title "End setup FAI" && echo
 }
 
