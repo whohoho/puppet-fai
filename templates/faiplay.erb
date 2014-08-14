@@ -553,7 +553,6 @@ configure_PXE_boot() { # TODO factorize code with the previous function
         [ -n "${VERBOSE}" ] && echo
         APPEND_KERNEL_PARAM=""
         [ -n "${LIVE_NETDEV}" ] && APPEND_KERNEL_PARAM="-k live-netdev=${LIVE_NETDEV}"
-        #${FAICHBOOT} -IF ${VERBOSE} -s2.6.26-2-amd64 $node
         ${FAICHBOOT} -P -IF ${VERBOSE} ${APPEND_KERNEL_PARAM} $node
         local exit_status=$?
         if [ -z "${VERBOSE}" ]; then
