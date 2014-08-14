@@ -471,8 +471,22 @@ class fai::common {
 # = Class: fai::debian
 #
 # Specialization class for Debian systems
-class fai::debian inherits fai::common { }
+class fai::debian inherits fai::common {
 
-
-
+    # Ugly / magical hack
+    # https://lists.uni-koeln.de/pipermail/linux-fai/2013-January/009899.html
+    # /srv/nfs4        1.2.3.4/28(rw,sync,fsid=0,crossmnt,no_subtree_check)
+    if ( $::lsbdistcodename == 'wheezy' ) {
+        nfs::server::export { "${fai::nfsrootdir}4":
+            ensure        => "${fai::ensure}",
+            allowed_hosts => '1.2.3.4/28',
+            options       => 'rw,sync,fsid=0,crossmnt,no_subtree_check',
+            require => [
+                        Package['FAI'],
+                        File["${fai::configspacedir}"],
+                        File["${fai::nfsrootdir}"],
+                       ]
+        }
+    }
+}
 
