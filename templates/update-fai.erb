@@ -2,11 +2,11 @@
 ################################################################################
 # update_fai -  update the local FAI configuration
 # Creation : 02 Feb 2010
-# Time-stamp: <Thu 2011-03-31 00:34 svarrette>
 #
 # Copyright (c) 2010 Sebastien Varrette <Sebastien.Varrette@uni.lu>
 #               http://varrette.gforge.uni.lu
-# $Id: update_fai 430 2013-05-28 17:00:19Z hcartiaux $
+# Copyright (c) 2013 Cartiaux Hyacinthe <Hyacinthe.Cartiaux@uni.lu>
+# Imported from svn: r430 2013-05-28 17:00:19Z hcartiaux $
 #
 # Description : see the print_help function or launch 'update_fai --help'
 #
@@ -25,7 +25,7 @@
 ################################################################################
 
 ### Global variables
-VERSION=0.2
+VERSION=0.3
 COMMAND=`basename $0`
 VERBOSE=""
 DEBUG=""
@@ -55,14 +55,13 @@ echo " ---- configure FAI and server config on the site $SITE ---"
 ### Local variables
 FAI_FILE_OWNER=root                        # file owner
 FAI_FILE_GROUP=faiadmin                    # file group
-FAI_SRC=/root/svn/ulclusters               # local working copy of the repository
+FAI_SRC=/root/<%= scope.lookupvar('fai::configspace_provider') %>/<%= @repo_path %>               # local working copy of the repository
 
-SRC_FAI_CONFIGDIR=${FAI_SRC}/FAI/config    # FAI source dir
 FAI_CONFIGDIR=/srv/fai/config              # FAI config dir
 
 
 dest_dir=$FAI_CONFIGDIR
-src_dir=$SRC_FAI_CONFIGDIR
+src_dir=$FAI_SRC
 
 
 #######################

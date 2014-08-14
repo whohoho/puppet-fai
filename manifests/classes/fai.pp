@@ -346,11 +346,10 @@ class fai::common {
             mode   => '0770'
         }
 
+        $repo_path = gsub($fai::configspace_url, '.*\/', '')
         case $fai::configspace_provider {
             svn: {
-                $svn_path = gsub($fai::configspace_url, '.*\/', '')
-
-                svn::checkout { "${svn_path}":
+                svn::checkout { "${repo_path}":
                     basedir => "/root/${fai::configspace_provider}",
                     source  => "${fai::configspace_url}",
                     require => File["/root/${fai::configspace_provider}"],
@@ -359,12 +358,10 @@ class fai::common {
             }
             git: {
                 include git
-                $git_path = gsub($fai::configspace_url, '.*\/', '')
-
-                git::clone { "${git_path}":
+                git::clone { "${repo_path}":
                     basedir => "/root/${fai::configspace_provider}",
                     source  => "${fai::configspace_url}",
-                    branch  => '',
+                    branch  => 'devel',
                     require => File["/root/${fai::configspace_provider}"],
                 }
             }
