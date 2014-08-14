@@ -210,8 +210,9 @@ class fai::params {
     $configfile = $::operatingsystem ? {
         default => '/etc/fai/fai.conf',
     }
-    $make_nfsroot_configfile = $::operatingsystem ? {
-        default => '/etc/fai/make-fai-nfsroot.conf',
+    $make_nfsroot_configfile = $::lsbdistcodename ? {
+        'squeeze' => '/etc/fai/make-fai-nfsroot.conf',
+        default => '/etc/fai/nfsroot.conf',
     }
     $nfsroot_configfile = $::operatingsystem ? {
         default => '/etc/fai/NFSROOT',
