@@ -27,6 +27,7 @@ cupt
 # some network cards needs firmware
 PACKAGES aptitude
 firmware-bnx2 firmware-bnx2x firmware-realtek
+firmware-linux-nonfree
 
 # Additional packages
 PACKAGES aptitude
@@ -44,11 +45,13 @@ portmap
 PACKAGES aptitude
 dracut-network live-boot- live-boot-initramfs-tools-
 rpcbind
+grub-pc
 <% end -%>
 
 # needed for the simple examples
 PACKAGES aptitude
 cfengine2 libapt-pkg-perl
+git
 
 PACKAGES aptitude AMD64
 grub read-edid
