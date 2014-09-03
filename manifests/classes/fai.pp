@@ -403,16 +403,8 @@ class fai::common {
             require => File["${fai::params::configdir}"]
         }
 
-        file { "${fai::params::nfsroot_hookdir}/patch-initrd":
-            ensure  => 'file',
-            owner   => "${fai::params::configdir_owner}",
-            group   => "${fai::params::admingroup}",
-            mode    => "${fai::params::hookfile_mode}",
-            content => template("fai/nfsroot-hooks/patch-inird.erb"),
-            require => File["${fai::params::nfsroot_hookdir}"]
-        }
         file { "${fai::params::nfsroot_hookdir}/blacklist-module":
-            ensure  => 'file',
+            ensure  => "${fai::ensure}",
             owner   => "${fai::params::configdir_owner}",
             group   => "${fai::params::admingroup}",
             mode    => "${fai::params::hookfile_mode}",
@@ -470,10 +462,23 @@ class fai::common {
 # Specialization class for Debian systems
 class fai::debian inherits fai::common {
 
-    # Ugly / magical hack
-    # https://lists.uni-koeln.de/pipermail/linux-fai/2013-January/009899.html
-    # /srv/nfs4        1.2.3.4/28(rw,sync,fsid=0,crossmnt,no_subtree_check)
+    # Version specific adaptations
+
+    if ( $::lsbdistcodename == 'squeeze' ) {
+        file { "${fai::params::nfsroot_hookdir}/patch-initrd":
+            ensure  => "${fai::ensure}",
+            owner   => "${fai::params::configdir_owner}",
+            group   => "${fai::params::admingroup}",
+            mode    => "${fai::params::hookfile_mode}",
+            content => template("fai/nfsroot-hooks/patch-inird.erb"),
+            require => File["${fai::params::nfsroot_hookdir}"]
+        }
+    }
+
     if ( $::lsbdistcodename == 'wheezy' ) {
+        # Ugly / magical hack
+        # https://lists.uni-koeln.de/pipermail/linux-fai/2013-January/009899.html
+        # /srv/nfs4        1.2.3.4/28(rw,sync,fsid=0,crossmnt,no_subtree_check)
         nfs::server::export { "${fai::nfsrootdir}4":
             ensure        => "${fai::ensure}",
             allowed_hosts => '1.2.3.4/28',

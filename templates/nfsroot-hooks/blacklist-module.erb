@@ -20,7 +20,7 @@
 
 echo "*** Enter blacklist module hook ***"
 
-echo "=> remove the following modules to the initrd: "
+echo "=> remove the following modules to the initrd: nouveau"
 cat >> ${NFSROOT}/etc/modprobe.d/nouveau-blacklist.conf  <<EOF
 # Blacklist opensource NVIDIAmodules
 blacklist nouveau

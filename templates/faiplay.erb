@@ -88,7 +88,7 @@ ALL_CLUSTER_NODES=`seq -s " " -f "${CLUSTERNODES_BASEHOSTNAME}%g" <%= scope.look
 IPMI_USER="<%= scope.lookupvar('fai::ipmiuser') %>"
 
 ### Kernel parameters
-echo $HOSTNAME | grep nyx-cluster && APPEND_KERNEL_PARAM="console=tty0 console=ttyS0,115200n8"
+echo $HOSTNAME | grep nyx-cluster > /dev/null && APPEND_KERNEL_PARAM="console=tty0 console=ttyS0,115200n8"
 
 #######################
 ### print functions ###
