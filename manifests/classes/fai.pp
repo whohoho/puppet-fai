@@ -484,6 +484,25 @@ class fai::debian inherits fai::common {
                         File["${fai::nfsrootdir}"],
                        ]
         }
+
+        # Ugly hack, cf debian bug #731244
+        # https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=731244
+        exec { "sed -i 's/root=/root=${ipaddress}:/' /usr/sbin/fai-chboot":
+            path    => "/usr/bin:/usr/sbin:/bin",
+            unless  => "grep root=${ipaddress} /usr/sbin/fai-chboot",
+            require => Package['FAI']
+        }
+
+
+    }
+    if ( $::lsbmajdistrelease > 6 ) {
+      apt::source{"fai":
+        type         => 'deb',
+        uri          => 'http://fai-project.org/download',
+        dist         => 'wheezy',
+        components   => 'koeln',
+        repo_key_url => 'http://fai-project.org/download/074BCDE4.asc'
+      } -> Package['FAI']
     }
 }
 
