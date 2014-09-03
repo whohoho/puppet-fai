@@ -476,19 +476,19 @@ class fai::debian inherits fai::common {
     }
 
     if ( $::lsbdistcodename == 'wheezy' ) {
-        # Ugly / magical hack
+        # Ugly / magical hack (enforced by fai-setup)
         # https://lists.uni-koeln.de/pipermail/linux-fai/2013-January/009899.html
-        # /srv/nfs4        1.2.3.4/28(rw,sync,fsid=0,crossmnt,no_subtree_check)
-        nfs::server::export { "${fai::nfsrootdir}4":
+        nfs::server::export { "/srv/nfs4":
             ensure        => "${fai::ensure}",
-            allowed_hosts => '1.2.3.4/28',
-            options       => 'rw,sync,fsid=0,crossmnt,no_subtree_check',
+            allowed_hosts => "${ipaddress}/16",
+            options       => 'fsid=0,async,ro,no_subtree_check',
             require => [
                         Package['FAI'],
                         File["${fai::configspacedir}"],
                         File["${fai::nfsrootdir}"],
                        ]
         }
+
 
         # Ugly hack, cf debian bug #731244
         # https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=731244
