@@ -54,7 +54,10 @@ PRINT_WIDTH=80     # minimal width for all prints with a status information on t
 
 ### Specific variables
 FAI_CONFIG_DIR="<%= scope.lookupvar('fai::configspacedir') %>"   # directory containing the FAI configuration
-SVN_FAI_CONFIG_DIR="/root/svn/ulclusters/FAI/config/disk_config" # TODO: variabilize
+<% if @lsbdistcodename == 'wheezy' -%>
+# Set FAI_CONFIG_SRC to URL. Setting this variable is mandatory for operation of FAI.
+FAI_CONFIG_SRC=nfs://<%= @fqdn %>/<%= scope.lookupvar('fai::configspacedir') %>
+<% end -%>
 FAI_TFTP_DIR="<%= scope.lookupvar('fai::tftpdir') %>"       # directory containing the FAI tftp configuration
 FAI_LOGDIR="/tmp/fai"              # base directory for the FAI logs on the nodes during installation
 FAICHBOOT="/usr/sbin/fai-chboot"   # hard path (without which) as I want to use it without root access
@@ -83,6 +86,9 @@ ALL_CLUSTER_NODES=`seq -s " " -f "${CLUSTERNODES_BASEHOSTNAME}%g" <%= scope.look
 
 ### IPMI elements
 IPMI_USER="<%= scope.lookupvar('fai::ipmiuser') %>"
+
+### Kernel parameters
+echo $HOSTNAME | grep nyx-cluster && APPEND_KERNEL_PARAM="console=tty0 console=ttyS0,115200n8"
 
 #######################
 ### print functions ###
@@ -551,9 +557,8 @@ configure_PXE_boot() { # TODO factorize code with the previous function
     for node in $node_to_configure; do
         echo -n -e "=> configuring PXE boot for ${COLOR_BOLD}$node${COLOR_BACK} \t"
         [ -n "${VERBOSE}" ] && echo
-        APPEND_KERNEL_PARAM=""
-        [ -n "${LIVE_NETDEV}" ] && APPEND_KERNEL_PARAM="-k live-netdev=${LIVE_NETDEV}"
-        ${FAICHBOOT} -P -IF ${VERBOSE} ${APPEND_KERNEL_PARAM} $node
+        [ -n "${LIVE_NETDEV}" ] && APPEND_KERNEL_PARAM="${APPEND_KERNEL_PARAM} live-netdev=${LIVE_NETDEV}"
+        ${FAICHBOOT} -P -IF ${VERBOSE} ${APPEND_KERNEL_PARAM:+-k "$APPEND_KERNEL_PARAM"} ${FAI_CONFIG_SRC+-u "$FAI_CONFIG_SRC"} $node
         local exit_status=$?
         if [ -z "${VERBOSE}" ]; then
             [ "$exit_status" -ne "0" ] && print_failed || print_ok
