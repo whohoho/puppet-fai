@@ -368,7 +368,7 @@ remote_execute() {
 ipmi_reboot(){
     [ $# -ne "1" ] && print_error_and_exit "[$FUNCNAME] missing host argument"
     local host=$1
-    execute "ipmitool -U ${IPMI_USER} -E -H ${host}-bmc chassis power reset"
+    execute "ipmitool -I lanplus -U ${IPMI_USER} -E -H ${host}-bmc chassis power reset"
     return $?
 }
 
