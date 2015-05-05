@@ -33,9 +33,7 @@ $ROOTCMD apt-get install -t <%= scope.lookupvar('fai::debootstrap_suite') %>-bac
 echo "=> add the following modules to the initrd: <%= scope.lookupvar('fai::initramfs_modules').join(',') %>"
 cat >> ${NFSROOT}/etc/dracut.conf.d/30-modules.conf <<EOF
 # Custom modules added by the NFSROOK hook
-<%     scope.lookupvar('fai::initramfs_modules').each do |modu| -%>
-add_drivers+="<%= modu %>"
-<% end -%>
+add_drivers+="<% scope.lookupvar('fai::initramfs_modules').each do |modu| -%><%= modu %> <% end -%>"
 EOF
 
 ${ROOTCMD} depmod -a
