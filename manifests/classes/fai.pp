@@ -475,6 +475,18 @@ class fai::debian inherits fai::common {
 
     if ( $::lsbdistcodename == 'wheezy' ) {
 
+        # Ugly / magical hack (enforced by fai-setup)
+        # https://lists.uni-koeln.de/pipermail/linux-fai/2013-January/009899.html
+        nfs::server::export { "/srv/nfs4":
+            ensure  => "${fai::ensure}",
+            content => "/srv/nfs4  ${ipaddress}/16(fsid=0,async,ro,no_subtree_check)",
+            require => [
+                        Package['FAI'],
+                        File["${fai::configspacedir}"],
+                        File["${fai::nfsrootdir}"],
+                       ]
+        }
+
         # Hack for the delta node (gaia-80)
         file { "${fai::params::nfsroot_hookdir}/20-download-mpt3sas":
             ensure  => "${fai::ensure}",
