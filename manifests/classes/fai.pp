@@ -473,22 +473,6 @@ class fai::debian inherits fai::common {
             content => template("fai/nfsroot-hooks/patch-inird.erb"),
             require => File["${fai::params::nfsroot_hookdir}"]
         }
-    }
-
-    if ( $::lsbdistcodename == 'wheezy' ) {
-        # Ugly / magical hack (enforced by fai-setup)
-        # https://lists.uni-koeln.de/pipermail/linux-fai/2013-January/009899.html
-        nfs::server::export { "/srv/nfs4":
-            ensure        => "${fai::ensure}",
-            allowed_hosts => "${ipaddress}/16",
-            options       => 'fsid=0,async,ro,no_subtree_check',
-            require => [
-                        Package['FAI'],
-                        File["${fai::configspacedir}"],
-                        File["${fai::nfsrootdir}"],
-                       ]
-        }
-
 
         # Ugly hack, cf debian bug #731244
         # https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=731244
