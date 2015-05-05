@@ -1,6 +1,6 @@
 #!/bin/bash
 ################################################################################
-# <%= scope.lookupvar('fai::params::nfsroot_hookdir') %>/patch-initrd
+# <%= scope.lookupvar('fai::params::nfsroot_hookdir') %>/30-patch-initrd
 #
 #       _   _ _____ ____  ____   ___   ___ _____   _   _             _
 #      | \ | |  ___/ ___||  _ \ / _ \ / _ \_   _| | | | | ___   ___ | | __
@@ -20,31 +20,33 @@
 
 echo "*** Enter patch initrd hook ***"
 
+TARGET_KERNEL_VERSION=`basename ${NFSROOT}/boot/initrd.img-* | sed "s/initrd\.img-//"`
+echo "target kernel = ${TARGET_KERNEL_VERSION}"
+INITRDFILE="/boot/initrd.img-${TARGET_KERNEL_VERSION}"
+MISCDIR=/lib/modules/${TARGET_KERNEL_VERSION}/misc
+
 <% if scope.lookupvar('fai::use_backports') == true -%>
 $ROOTCMD apt-get install -t <%= scope.lookupvar('fai::debootstrap_suite') %>-backports firmware-bnx2
 <% end -%>
 
 <% if scope.lookupvar('fai::initramfs_modules') != [] -%>
 echo "=> add the following modules to the initrd: <%= scope.lookupvar('fai::initramfs_modules').join(',') %>"
-cat >> ${NFSROOT}/etc/initramfs-tools/modules <<EOF
+cat >> ${NFSROOT}/etc/dracut.conf.d/30-modules.conf <<EOF
 # Custom modules added by the NFSROOK hook
 <%     scope.lookupvar('fai::initramfs_modules').each do |modu| -%>
-<%= modu %>
+add_drivers+="<%= modu %>"
 <% end -%>
 EOF
 
-#TARGET_BASEVERSION=`$ROOTCMD dpkg -l | grep linux-base | awk '{print $3}' | cut -d "-" -f 1`
-#TARGET_KERNEL_VERSION=`basename ${NFSROOT}/boot/initrd.img-${TARGET_BASEVERSION}* | sed "s/initrd\.img-//"`
-TARGET_KERNEL_VERSION=`basename ${NFSROOT}/boot/initrd.img-* | sed "s/initrd\.img-//"`
-echo "target kernel = ${TARGET_KERNEL_VERSION}"
-INITRDFILE="/boot/initrd.img-${TARGET_KERNEL_VERSION}"
+${ROOTCMD} depmod -a
+
 
 if [ -f "${NFSROOT}/${INITRDFILE}" ]; then
     echo "=> removing ${NFSROOT}/${INITRDFILE}"
     rm -f ${NFSROOT}/${INITRDFILE}
 
     echo "=> updating initramfs for the nfsroot"
-    $ROOTCMD update-initramfs -k ${TARGET_KERNEL_VERSION} -c
+    $ROOTCMD dracut -f ${INITRDFILE}
 
     echo "=> updating ${TFTPROOT}/initrd.img-*"
     cp ${NFSROOT}/boot/initrd.img-* ${TFTPROOT}/

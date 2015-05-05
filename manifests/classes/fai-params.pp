@@ -86,7 +86,7 @@ class fai::params {
     # Suite (i.e.) distribution to be used to generate the FAI NFSroot directory
     # cf make-fai-nfsroot(8)
     $debootstrap_suite = $fai_debootstrap_suite ? {
-        ''      => 'squeeze',
+        ''      => 'wheezy',
         default => "${fai_debootstrap_suite}"
     }
     # Options to be passed to debootstrap -- see make-fai-nfsroot(8).
@@ -212,7 +212,8 @@ class fai::params {
     }
     $make_nfsroot_configfile = $::lsbdistcodename ? {
         'squeeze' => '/etc/fai/make-fai-nfsroot.conf',
-        default => '/etc/fai/nfsroot.conf',
+        'wheezy'  => '/etc/fai/nfsroot.conf',
+        default   => '/etc/fai/nfsroot.conf'
     }
     $nfsroot_configfile = $::operatingsystem ? {
         default => '/etc/fai/NFSROOT',

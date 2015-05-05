@@ -723,12 +723,7 @@ fai_setup() {
     local fai_setup_log="/tmp/fai-setup.$$.log"
 
     echo && title "Setup FAI"
-    #fai-setup $verbose 2>&1 | tee $fai_setup_log
-<% if @lsbdistcodename == 'squeeze' -%>
-    fai-setup ${VERBOSE}
-<% else -%>
     fai-setup -f ${VERBOSE}
-<% end -%>
     title "End setup FAI" && echo
 }
 

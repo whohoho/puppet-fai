@@ -23,7 +23,7 @@
 #           debmirror server.
 # $debmirror_mountdir:: *Default*: '/mnt/debmirror'. Local mount point where
 #           the mirror will be mounted
-# $debootstrap_suite:: *Default*: 'squeeze'. Suite (i.e.) distribution to be
+# $debootstrap_suite:: *Default*: 'wheezy'. Suite (i.e.) distribution to be
 #           used to generate the FAI NFSroot directory, see make-fai-nfsroot(8)
 # $debootstrap_opts:: *Default*: '--exclude=dhcp-client,info --arch amd64'.
 #           Options to be passed to debootstrap -- see make-fai-nfsroot(8).
@@ -403,7 +403,7 @@ class fai::common {
             require => File["${fai::params::configdir}"]
         }
 
-        file { "${fai::params::nfsroot_hookdir}/blacklist-module":
+        file { "${fai::params::nfsroot_hookdir}/10-blacklist-module":
             ensure  => "${fai::ensure}",
             owner   => "${fai::params::configdir_owner}",
             group   => "${fai::params::admingroup}",
@@ -464,13 +464,24 @@ class fai::debian inherits fai::common {
 
     # Version specific adaptations
 
-    if ( $::lsbdistcodename == 'squeeze' ) {
-        file { "${fai::params::nfsroot_hookdir}/patch-initrd":
+    file { "${fai::params::nfsroot_hookdir}/30-patch-initrd":
+        ensure  => "${fai::ensure}",
+        owner   => "${fai::params::configdir_owner}",
+        group   => "${fai::params::admingroup}",
+        mode    => "${fai::params::hookfile_mode}",
+        content => template("fai/nfsroot-hooks/patch-initrd.erb"),
+        require => File["${fai::params::nfsroot_hookdir}"]
+    }
+
+    if ( $::lsbdistcodename == 'wheezy' ) {
+
+        # Hack for the delta node (gaia-80)
+        file { "${fai::params::nfsroot_hookdir}/20-download-mpt3sas":
             ensure  => "${fai::ensure}",
             owner   => "${fai::params::configdir_owner}",
             group   => "${fai::params::admingroup}",
             mode    => "${fai::params::hookfile_mode}",
-            content => template("fai/nfsroot-hooks/patch-inird.erb"),
+            content => template("fai/nfsroot-hooks/download-mpt3sas.erb"),
             require => File["${fai::params::nfsroot_hookdir}"]
         }
 
@@ -482,16 +493,13 @@ class fai::debian inherits fai::common {
             require => Package['FAI']
         }
 
-
-    }
-    if ( $::lsbmajdistrelease > 6 ) {
-      apt::source{"fai":
-        type         => 'deb',
-        uri          => 'http://fai-project.org/download',
-        dist         => 'wheezy',
-        components   => 'koeln',
-        repo_key_url => 'http://fai-project.org/download/074BCDE4.asc'
-      } -> Package['FAI']
+        apt::source{"fai":
+          type         => 'deb',
+          uri          => 'http://fai-project.org/download',
+          dist         => 'wheezy',
+          components   => 'koeln',
+          repo_key_url => 'http://fai-project.org/download/074BCDE4.asc'
+        } -> Package['FAI']
     }
 }
 

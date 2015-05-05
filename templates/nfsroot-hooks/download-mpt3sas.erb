@@ -1,6 +1,6 @@
 #!/bin/bash
 ################################################################################
-# <%= scope.lookupvar('fai::params::nfsroot_hookdir') %>/10-blacklist-module
+# <%= scope.lookupvar('fai::params::nfsroot_hookdir') %>/20-download-mpt3sas
 #
 #       _   _ _____ ____  ____   ___   ___ _____   _   _             _
 #      | \ | |  ___/ ___||  _ \ / _ \ / _ \_   _| | | | | ___   ___ | | __
@@ -18,12 +18,12 @@
 #      puppet invocation
 ################################################################################
 
-echo "*** Enter blacklist module hook ***"
+echo "*** Enter download-mpt3sas hook ***"
 
-echo "=> remove the following modules to the initrd: nouveau"
-cat >> ${NFSROOT}/etc/modprobe.d/nouveau-blacklist.conf  <<EOF
-# Blacklist opensource NVIDIAmodules
-blacklist nouveau
-EOF
+TARGET_KERNEL_VERSION=`basename ${NFSROOT}/boot/initrd.img-* | sed "s/initrd\.img-//"`
+echo "target kernel = ${TARGET_KERNEL_VERSION}"
+MISCDIR=/lib/modules/${TARGET_KERNEL_VERSION}/misc
+${ROOTCMD} mkdir $MISCDIR
+echo "=> downloading module: mpt3sas"
+wget -q https://www.dropbox.com/s/60n7i71d3aq3djv/mpt3sas.ko -O ${NFSROOT}/${MISCDIR}/mpt3sas.ko
 
-echo "Exit blacklist module hook"
