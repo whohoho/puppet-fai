@@ -479,7 +479,7 @@ class fai::debian inherits fai::common {
         # https://lists.uni-koeln.de/pipermail/linux-fai/2013-January/009899.html
         nfs::server::export { "/srv/nfs4":
             ensure  => "${fai::ensure}",
-            content => "/srv/nfs4  ${ipaddress}/16(fsid=0,async,ro,no_subtree_check)",
+            content => "/srv/nfs4  ${ipaddress}/16(fsid=0,async,ro,no_subtree_check)\n",
             require => [
                         Package['FAI'],
                         File["${fai::configspacedir}"],
