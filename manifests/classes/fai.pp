@@ -497,6 +497,16 @@ class fai::debian inherits fai::common {
             require => File["${fai::params::nfsroot_hookdir}"]
         }
 
+        # Hack for the Moonshot nodes, requiring newer Mellanox driver than available in Debian7
+        file { "${fai::params::nfsroot_hookdir}/21-download-mlx4":
+            ensure  => "${fai::ensure}",
+            owner   => "${fai::params::configdir_owner}",
+            group   => "${fai::params::admingroup}",
+            mode    => "${fai::params::hookfile_mode}",
+            content => template("fai/nfsroot-hooks/download-mlx4.erb"),
+            require => File["${fai::params::nfsroot_hookdir}"]
+        }
+
         # Ugly hack, cf debian bug #731244
         # https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=731244
         exec { "sed -i 's/root=/root=${ipaddress}:/' /usr/sbin/fai-chboot":
