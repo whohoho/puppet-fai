@@ -514,6 +514,12 @@ class fai::debian inherits fai::common {
             unless  => "grep root=${ipaddress} /usr/sbin/fai-chboot",
             require => Package['FAI']
         }
+        # Ugly hack, cf http://blog.gmane.org/gmane.linux.debian.fai/month=20150901
+        exec { "sed -i 's/localboot 0/localboot -1/' /usr/sbin/fai-chboot":
+            path    => "/usr/bin:/usr/sbin:/bin",
+            unless  => "grep 'localboot -1' /usr/sbin/fai-chboot",
+            require => Package['FAI']
+        }
 
         apt::source{"fai":
           type         => 'deb',
