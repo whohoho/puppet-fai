@@ -68,16 +68,6 @@ class fai::common {
         require => Mount[$fai::debmirror_mountdir]
     }
 
-    # Configure kanif
-    file { '/etc/kanif.conf':
-        ensure  => $fai::ensure,
-        owner   => 'root',
-        group   => $fai::params::admingroup,
-        mode    => '0644',
-        source  => 'puppet:///modules/fai/kanif.conf',
-        require => Package['kanif']
-    }
-
     # Create the group
     group { $fai::params::admingroup:
         ensure  => $fai::ensure,

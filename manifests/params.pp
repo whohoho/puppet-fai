@@ -137,7 +137,7 @@ class fai::params {
         default => 'fai-server',
     }
     $extra_packages = $::operatingsystem ? {
-        default => [ 'fai-doc', 'kanif', 'taktuk' ]
+        default => [ 'fai-doc' ]
     }
     $admingroup = $::operatingsystem ? {
         default => 'faiadmin'
