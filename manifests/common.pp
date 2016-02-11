@@ -17,9 +17,8 @@ class fai::common {
 
     # Pre-requisite checks: ensure some services are set
     # TFTP server
-    class { 'tftp::server':
-        ensure   => $fai::ensure,
-        data_dir => $fai::tftpdir,
+    class { 'tftp':
+        directory => $fai::tftpdir,
         require  => File[$fai::tftpdir]
     }
 
