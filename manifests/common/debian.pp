@@ -73,7 +73,7 @@ class fai::common::debian inherits fai::common {
           release  => 'wheezy',
           repos    => 'koeln',
           key      => {
-            'id'     => '074BCDE4',
+            'id'     => 'B11EE3273F6B2DEB528C93DA2BF8D9FE074BCDE4',
             'source' => 'http://fai-project.org/download/074BCDE4.asc'
           },
         } -> Package['FAI']
