@@ -1,0 +1,30 @@
+{
+  "name": "ULHPC/fai",
+  "version": "0.0.1",
+  "author": "S. Varrette, H. Cartiaux, V. Plugaru, S. Diehl aka. UL HPC Management Team",
+  "mail": "hpc-sysadmins@uni.lu",
+  "summary": "Configure and manage the Fully Automatic Installation (FAI) system",
+  "description": "Configure and manage the Fully Automatic Installation (FAI) system",
+  "license": "GPL-3.0",
+  "source": "https://github.com/ULHPC/puppet-fai",
+  "docs_project": "ulhpc-puppet-fai",
+  "project_page": "https://github.com/ULHPC/puppet-fai",
+  "issues_url": "https://github.com/ULHPC/puppet-fai/issues",
+  "forge_url": "https://forge.puppetlabs.com/ULHPC/fai",
+  "dependencies": [
+    {
+      "name": "puppetlabs-stdlib",
+      "version_requirement": ">=4.2.2 <5.0.0"
+    }
+  ],
+  "operatingsystem_support": [
+    {
+      "operatingsystem": "Debian",
+      "operatingsystemrelease": [
+        "6",
+        "7"
+      ]
+    }
+  ],
+  "tags": ["fai", "bootstrap", "pxe"]
+}
