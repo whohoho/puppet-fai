@@ -210,7 +210,7 @@ class fai::common {
             mode   => '0770'
         }
 
-        $repo_path = gsub($fai::configspace_url, '.*\/', '')
+        $repo_path = regsubst($fai::configspace_url, '.*\/', '')
         vcsrepo { $repo_path:
             ensure   => $fai::params::ensure,
             path     => "/root/${fai::configspace_provider}",
