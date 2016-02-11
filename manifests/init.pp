@@ -119,7 +119,7 @@ inherits fai::params
     case $::operatingsystem {
         debian, ubuntu:         { include fai::common::debian }
         default: {
-            fail("Module ${module_name} is not supported on ${operatingsystem}")
+            fail("Module ${::module_name} is not supported on ${::operatingsystem}")
         }
     }
 }

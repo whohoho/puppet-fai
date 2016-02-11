@@ -15,7 +15,7 @@
 
 include 'fai::params'
 
-$names = ["ensure", "protocol", "port", "packagename"]
+$names = ['ensure', 'protocol', 'port', 'packagename']
 
 notice("fai::params::ensure = ${fai::params::ensure}")
 notice("fai::params::protocol = ${fai::params::protocol}")

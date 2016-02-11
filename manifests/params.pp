@@ -222,7 +222,7 @@ class fai::params {
         default => '/etc/fai/nfsroot-hooks',
     }
     $nfsroot_kernelversion = $::operatingsystem ? {
-        default => $kernelversion
+        default => $::kernelversion
     }
 
     $apt_sources = $::operatingsystem ? {

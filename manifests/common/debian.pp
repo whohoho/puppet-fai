@@ -58,7 +58,7 @@ class fai::common::debian inherits fai::common {
         # https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=731244
         exec { "sed -i 's/root=/root=${::ipaddress}:/' /usr/sbin/fai-chboot":
             path    => '/usr/bin:/usr/sbin:/bin',
-            unless  => "grep root=${ipaddress} /usr/sbin/fai-chboot",
+            unless  => "grep root=${::ipaddress} /usr/sbin/fai-chboot",
             require => Package['FAI']
         }
         # Ugly hack, cf http://blog.gmane.org/gmane.linux.debian.fai/month=20150901
