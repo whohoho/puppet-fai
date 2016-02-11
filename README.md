@@ -55,7 +55,23 @@ It accepts the following parameters:
 
 Use it as follows:
 
-     include ' fai'
+     class { 'fai':
+         deploynode_basename   => 'node-',
+         deploynode_minindex   => 1,
+         deploynode_maxindex   => 200,
+         configspace_provider  => 'git',
+         configspace_url       => 'https://github.com/faiproject/fai',
+         debmirror             => '10.20.30.40',
+         debmirror_exportdir   => '/export/debmirror',
+         debmirror_mountdir    => '/mnt/debmirror',
+         debootstrap_suite     => 'wheezy',
+         ssh_identity          => '/root/.ssh/id_dsa.pub',
+         allowed_clients       => '10.20.0.0/16',
+         ipmiuser              => 'ipmiadmin',
+         use_backports         => false,
+         nfsroot_kernelversion => '3.2.0-4-amd64',
+         initramfs_modules     => [ 'bnx2', 'tg3', 'mpt3sas', 'mlx4_core', 'mlx4_en' ]
+     }
 
 See also [`tests/init.pp`](tests/init.pp)
 
