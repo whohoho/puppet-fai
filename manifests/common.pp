@@ -11,7 +11,6 @@
 # Note: respect the Naming standard provided here[http://projects.puppetlabs.com/projects/puppet/wiki/Module_Standards]
 class fai::common {
 
-    include ipmitool
     # Load the variables used in this module. Check the fai-params.pp file
     require fai::params
 
