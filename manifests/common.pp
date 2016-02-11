@@ -19,7 +19,7 @@ class fai::common {
     # TFTP server
     class { 'tftp':
         directory => $fai::tftpdir,
-        require  => File[$fai::tftpdir]
+        require   => File[$fai::tftpdir]
     }
 
     # NFS
@@ -212,25 +212,12 @@ class fai::common {
         }
 
         $repo_path = gsub($fai::configspace_url, '.*\/', '')
-        case $fai::configspace_provider {
-            svn: {
-                svn::checkout { $repo_path:
-                    basedir => "/root/${fai::configspace_provider}",
-                    source  => $fai::configspace_url,
-                    require => File["/root/${fai::configspace_provider}"],
-                    timeout => 60,
-                }
-            }
-            git: {
-                include git
-                git::clone { $repo_path:
-                    basedir => "/root/${fai::configspace_provider}",
-                    source  => $fai::configspace_url,
-                    branch  => 'devel',
-                    require => File["/root/${fai::configspace_provider}"],
-                }
-            }
-            default: { err ( "Unsupported provider for fai: '${fai::configspace_provider}'" ) }
+        vcsrepo { $repo_path:
+            ensure   => $fai::params::ensure,
+            path     => "/root/${fai::configspace_provider}",
+            source   => $fai::configspace_url,
+            provider => $fai::configspace_provider,
+            require  => File["/root/${fai::configspace_provider}"]
         }
 
         # Configure FAI
