@@ -285,28 +285,28 @@ class fai::common {
             require => File['/root/bin']
         }
 
-        # Prepare the binary tools
-        if ($::site in [ 'gaia-cluster', 'chaos-cluster', 'nyx-cluster']) {
-            $clustername = regsubst($::site, '/-cluster/', '')
-            file { "/root/bin/${clustername}-ipmi":
-                ensure  => 'link',
-                target  => '/root/bin/ipmiwrapper',
-                require => File['/root/bin/faiplay']
-            }
-
-            file { "/root/bin/${clustername}-update_fai":
-                ensure  => 'link',
-                target  => '/root/bin/update-fai',
-                require => File['/root/bin/faiplay']
-            }
-
-            file { "/root/bin/${clustername}-fai":
-                ensure  => 'link',
-                target  => '/root/bin/faiplay',
-                require => File['/root/bin/faiplay']
-            }
-
-        }
+#        # ULHPC specific command names
+#        if ($::site in [ 'gaia-cluster', 'chaos-cluster', 'nyx-cluster']) {
+#            $clustername = regsubst($::site, '/-cluster/', '')
+#            file { "/root/bin/${clustername}-ipmi":
+#                ensure  => 'link',
+#                target  => '/root/bin/ipmiwrapper',
+#                require => File['/root/bin/faiplay']
+#            }
+#
+#            file { "/root/bin/${clustername}-update_fai":
+#                ensure  => 'link',
+#                target  => '/root/bin/update-fai',
+#                require => File['/root/bin/faiplay']
+#            }
+#
+#            file { "/root/bin/${clustername}-fai":
+#                ensure  => 'link',
+#                target  => '/root/bin/faiplay',
+#                require => File['/root/bin/faiplay']
+#            }
+#
+#        }
 
     }
     else
