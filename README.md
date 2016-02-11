@@ -21,6 +21,10 @@ Configure and manage the Fully Automatic Installation (FAI) system.
 This module implements the following elements: 
 
 * __Puppet classes__:
+    - `fai` 
+    - `fai::common` 
+    - `fai::common::debian` 
+    - `fai::params` 
 
 * __Puppet definitions__: 
 
@@ -35,6 +39,10 @@ See `docs/contributing.md` for more details on the steps you shall follow to hav
 See [`metadata.json`](metadata.json). In particular, this module depends on 
 
 * [puppetlabs/stdlib](https://forge.puppetlabs.com/puppetlabs/stdlib)
+* [puppetlabs/tftp](https://forge.puppetlabs.com/puppetlabs/tftp)
+* [puppetlabs/vcsrepo](https://forge.puppetlabs.com/puppetlabs/vcsrepo)
+* [puppetlabs/apt](https://forge.puppetlabs.com/puppetlabs/apt)
+* [ULHPC/nfs](https://forge.puppetlabs.com/ULHPC/nfs)
 
 ## Overview and Usage
 
