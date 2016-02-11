@@ -19,7 +19,12 @@ class fai::common {
     class { 'tftp':
         directory => $fai::tftpdir,
         require   => File[$fai::tftpdir]
+    } ->
+    class { 'pxelinux':
+        ensure   => $fai::ensure,
+        root_dir => $fai::tftpdir,
     }
+
 
     # NFS
     if (! defined( Class['nfs::server'] )) {
@@ -190,6 +195,10 @@ class fai::common {
         }
         # /srv/tftp/fai/
         if (! defined( File[$fai::tftpdir])) {
+            exec { "mkdir -p ${fai::tftpdir}":
+                path   => [ '/bin', '/usr/bin' ],
+                unless => "test -d ${fai::tftpdir}",
+            } ->
             file { $fai::tftpdir:
                 ensure  => 'directory',
                 owner   => $fai::params::configdir_owner,

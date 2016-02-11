@@ -31,6 +31,10 @@
     {
       "name": "ULHPC-nfs",
       "version_range": ">=0.1.5 <=1.0.0"
+    },
+    {
+      "name": "ULHPC-pxelinux",
+      "version_range": ">=0.0.3 <=1.0.0"
     }
   ],
   "operatingsystem_support": [
