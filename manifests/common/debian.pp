@@ -68,13 +68,16 @@ class fai::common::debian inherits fai::common {
             require => Package['FAI']
         }
 
-        apt::source{'fai':
-          type         => 'deb',
-          uri          => 'http://fai-project.org/download',
-          dist         => 'wheezy',
-          components   => 'koeln',
-          repo_key_url => 'http://fai-project.org/download/074BCDE4.asc'
+        apt::source { 'fai':
+          location => 'http://fai-project.org/download',
+          release  => 'wheezy',
+          repos    => 'koeln',
+          key      => {
+            'id'     => '074BCDE4',
+            'source' => 'http://fai-project.org/download/074BCDE4.asc'
+          },
         } -> Package['FAI']
+
     }
 
 }
