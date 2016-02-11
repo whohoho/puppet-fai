@@ -21,6 +21,10 @@ Configure and manage the Fully Automatic Installation (FAI) system.
 This module implements the following elements: 
 
 * __Puppet classes__:
+    - `fai` 
+    - `fai::common` 
+    - `fai::common::debian` 
+    - `fai::params` 
 
 * __Puppet definitions__: 
 
@@ -35,6 +39,10 @@ See `docs/contributing.md` for more details on the steps you shall follow to hav
 See [`metadata.json`](metadata.json). In particular, this module depends on 
 
 * [puppetlabs/stdlib](https://forge.puppetlabs.com/puppetlabs/stdlib)
+* [puppetlabs/tftp](https://forge.puppetlabs.com/puppetlabs/tftp)
+* [puppetlabs/vcsrepo](https://forge.puppetlabs.com/puppetlabs/vcsrepo)
+* [puppetlabs/apt](https://forge.puppetlabs.com/puppetlabs/apt)
+* [ULHPC/nfs](https://forge.puppetlabs.com/ULHPC/nfs)
 
 ## Overview and Usage
 
@@ -47,7 +55,23 @@ It accepts the following parameters:
 
 Use it as follows:
 
-     include ' fai'
+     class { 'fai':
+         deploynode_basename   => 'node-',
+         deploynode_minindex   => 1,
+         deploynode_maxindex   => 200,
+         configspace_provider  => 'git',
+         configspace_url       => 'https://github.com/faiproject/fai',
+         debmirror             => '10.20.30.40',
+         debmirror_exportdir   => '/export/debmirror',
+         debmirror_mountdir    => '/mnt/debmirror',
+         debootstrap_suite     => 'wheezy',
+         ssh_identity          => '/root/.ssh/id_dsa.pub',
+         allowed_clients       => '10.20.0.0/16',
+         ipmiuser              => 'ipmiadmin',
+         use_backports         => false,
+         nfsroot_kernelversion => '3.2.0-4-amd64',
+         initramfs_modules     => [ 'bnx2', 'tg3', 'mpt3sas', 'mlx4_core', 'mlx4_en' ]
+     }
 
 See also [`tests/init.pp`](tests/init.pp)
 
