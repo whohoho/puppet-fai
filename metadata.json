@@ -23,6 +23,14 @@
     {
       "name": "puppetlabs-vcsrepo",
       "version_range": ">=1.2.0 <=2.0.0"
+    },
+    {
+      "name": "puppetlabs-apt",
+      "version_range": ">=2.2.1 <=3.0.0"
+    },
+    {
+      "name": "ULHPC-nfs",
+      "version_range": ">=0.1.5 <=1.0.0"
     }
   ],
   "operatingsystem_support": [
@@ -34,5 +42,18 @@
       ]
     }
   ],
-  "tags": ["fai", "bootstrap", "pxe"]
+  "tags": [
+    "fai",
+    "bootstrap",
+    "pxe"
+  ],
+  "classes": [
+    "fai",
+    "fai::common",
+    "fai::common::debian",
+    "fai::params"
+  ],
+  "definitions": [
+
+  ]
 }
