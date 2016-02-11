@@ -23,6 +23,7 @@ class fai::common {
     class { 'pxelinux':
         ensure   => $fai::ensure,
         root_dir => $fai::tftpdir,
+        require  => File[$fai::tftpdir]
     }
 
 
@@ -194,11 +195,11 @@ class fai::common {
                         ]
         }
         # /srv/tftp/fai/
+        exec { "mkdir -p ${fai::tftpdir}":
+            path   => [ '/bin', '/usr/bin' ],
+            unless => "test -d ${fai::tftpdir}",
+        }
         if (! defined( File[$fai::tftpdir])) {
-            exec { "mkdir -p ${fai::tftpdir}":
-                path   => [ '/bin', '/usr/bin' ],
-                unless => "test -d ${fai::tftpdir}",
-            } ->
             file { $fai::tftpdir:
                 ensure  => 'directory',
                 owner   => $fai::params::configdir_owner,
@@ -206,8 +207,9 @@ class fai::common {
                 mode    => $fai::params::configdir_mode,
                 require => [
                             Package['FAI'],
-                            Group[$fai::params::admingroup]
-                            ]
+                            Group[$fai::params::admingroup],
+                            Exec["mkdir -p ${fai::tftpdir}"]
+                          ]
             }
         }
 
