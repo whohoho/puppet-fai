@@ -54,7 +54,7 @@ PRINT_WIDTH=80     # minimal width for all prints with a status information on t
 
 ### Specific variables
 FAI_CONFIG_DIR="<%= scope.lookupvar('fai::configspacedir') %>"   # directory containing the FAI configuration
-<% if @lsbdistcodename == 'wheezy' -%>
+<% if @lsbdistcodename == 'wheezy' or @lsbdistcodename == 'jessie' -%>
 # Set FAI_CONFIG_SRC to URL. Setting this variable is mandatory for operation of FAI.
 FAI_CONFIG_SRC=nfs://<%= @fqdn %>/<%= scope.lookupvar('fai::configspacedir') %>
 <% end -%>

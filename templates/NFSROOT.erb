@@ -14,15 +14,25 @@
 # Package list for creating the NFSROOT
 
 PACKAGES aptitude
-nfs-common fai-nfsroot module-init-tools ssh rdate lshw
+nfs-common fai-nfsroot module-init-tools ssh rdate lshw rpcbind
 rsync lftp less dump reiserfsprogs e2fsprogs usbutils
 hwinfo psmisc pciutils hdparm smartmontools parted mdadm lvm2
 dnsutils ntpdate dosfstools xfsprogs xfsdump
 procinfo numactl dialog
-console-tools console-common
+console-tools console-common kbd
 iproute udev subversion
 xz-utils
 cupt
+
+<% if @lsbdistcodename == 'jessie' %>
+PACKAGES install
+btrfs-tools
+iproute2 netselect moreutils
+pxelinux syslinux-common
+curl wget- libpsl0-
+libicu52-
+nmap
+<% end %>
 
 # some network cards needs firmware
 PACKAGES aptitude
@@ -39,9 +49,16 @@ gnupg debian-keyring
 
 PACKAGES aptitude
 dracut-network live-boot- live-boot-initramfs-tools-
-rpcbind
 grub-pc
-kbd
+
+<% if @lsbdistcodename == 'jessie' %>
+PACKAGES install
+dracut-network dracut
+dracut-config-generic
+sysvinit-core systemd-sysv-
+grub read-edid
+linux-image-amd64
+<% end %>
 
 # needed for the simple examples
 PACKAGES aptitude

@@ -54,13 +54,6 @@ class fai::common::debian inherits fai::common {
             require => File[$fai::params::nfsroot_hookdir]
         }
 
-        # Ugly hack, cf debian bug #731244
-        # https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=731244
-        exec { "sed -i 's/root=/root=${::ipaddress}:/' /usr/sbin/fai-chboot":
-            path    => '/usr/bin:/usr/sbin:/bin',
-            unless  => "grep root=${::ipaddress} /usr/sbin/fai-chboot",
-            require => Package['FAI']
-        }
         # Ugly hack, cf http://blog.gmane.org/gmane.linux.debian.fai/month=20150901
         exec { "sed -i 's/localboot 0/localboot -1/' /usr/sbin/fai-chboot":
             path    => '/usr/bin:/usr/sbin:/bin',
@@ -68,16 +61,24 @@ class fai::common::debian inherits fai::common {
             require => Package['FAI']
         }
 
-        apt::source { 'fai':
-          location => 'http://fai-project.org/download',
-          release  => 'wheezy',
-          repos    => 'koeln',
-          key      => {
-            'id'     => 'B11EE3273F6B2DEB528C93DA2BF8D9FE074BCDE4',
-            'source' => 'http://fai-project.org/download/074BCDE4.asc'
-          },
-        } -> Package['FAI']
 
     }
+
+    # Ugly hack, cf debian bug #731244
+    # https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=731244
+    exec { "sed -i 's/root=/root=${::ipaddress}:/' /usr/sbin/fai-chboot":
+        path    => '/usr/bin:/usr/sbin:/bin',
+        unless  => "grep root=${::ipaddress} /usr/sbin/fai-chboot",
+        require => Package['FAI']
+    }
+    apt::source { 'fai':
+      location => 'http://fai-project.org/download',
+      release  => 'wheezy',
+      repos    => 'koeln',
+      key      => {
+        'id'     => 'B11EE3273F6B2DEB528C93DA2BF8D9FE074BCDE4',
+        'source' => 'http://fai-project.org/download/074BCDE4.asc'
+      },
+    } -> Package['FAI']
 
 }

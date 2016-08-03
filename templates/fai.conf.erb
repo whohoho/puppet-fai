@@ -35,19 +35,21 @@ romountopt="${romountopt},nfsvers=3,tcp"
 # Define it, to enable it, eg. LOGUSER=fai
 LOGUSER=<%= scope.lookupvar('fai::loguser') %>
 
-
 # set protocol type for saving logs. Values: ssh, rsh, ftp
 FAI_LOGPROTO=<%= scope.lookupvar('fai::logproto') %>
+
+<% if @lsbmajdistrelease.to_i < 8 and @lsbdistid == 'Debian' %>
 
 # Access to Debian mirror via NFS mounted directory
 # If FAI_DEBMIRROR is defined, install clients mount it to $MNTPOINT
 FAI_DEBMIRROR=<%= scope.lookupvar('fai::debmirror') %>:<%= scope.lookupvar('fai::debmirror_exportdir') %>
 
-# The following variables are read only for almost every user.
-# Do not change them unless you know what you are doing!
-
 # mount point where the mirror will be mounted
 MNTPOINT=<%= scope.lookupvar('fai::debmirror_mountdir') %>
+<% end %>
+
+# The following variables are read only for almost every user.
+# Do not change them unless you know what you are doing!
 
 # the local configuration directory on the install client
 FAI=/var/lib/fai/config
