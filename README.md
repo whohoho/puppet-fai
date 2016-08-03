@@ -43,6 +43,7 @@ See [`metadata.json`](metadata.json). In particular, this module depends on
 * [puppetlabs/vcsrepo](https://forge.puppetlabs.com/puppetlabs/vcsrepo)
 * [puppetlabs/apt](https://forge.puppetlabs.com/puppetlabs/apt)
 * [ULHPC/nfs](https://forge.puppetlabs.com/ULHPC/nfs)
+* [ULHPC/pxelinux](https://forge.puppetlabs.com/ULHPC/pxelinux)
 
 ## Overview and Usage
 
