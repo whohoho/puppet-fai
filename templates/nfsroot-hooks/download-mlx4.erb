@@ -24,8 +24,8 @@ mkdir ${NFSROOT}/tmp/mlx
 cd ${NFSROOT}/tmp/mlx
 echo "=> downloading mellanox debs"
 
-wget -q https://dl.dropboxusercontent.com/u/12871725/FAI/mlnx-en-dkms_3.3-1.0.0.0.0.gf583963_all.deb
-wget -q https://dl.dropboxusercontent.com/u/12871725/FAI/mlnx-en-utils_3.3-1.0.0.0.0.gf583963_amd64.deb
+wget -q https://www.dropbox.com/s/4vf7zkqenzrhbfy/mlnx-en-dkms_3.3-1.0.0.0.0.gf583963_all.deb
+wget -q https://www.dropbox.com/s/i4d28irrvqkkymn/mlnx-en-utils_3.3-1.0.0.0.0.gf583963_amd64.deb
 
 sha256sum -c <<< "fcffda638bd789561dc5b4b30e6703fb92f517fe76fe86a5a4c528baa5926c69  mlnx-en-dkms_3.3-1.0.0.0.0.gf583963_all.deb
                   248fab4d7579fabf06e577794eab966b37e02fe275649c6ba7587c6db6297092  mlnx-en-utils_3.3-1.0.0.0.0.gf583963_amd64.deb"
