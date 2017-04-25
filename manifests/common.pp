@@ -274,6 +274,15 @@ class fai::common {
             require => File[$fai::params::nfsroot_hookdir]
         }
 
+        file { "${fai::params::nfsroot_hookdir}/50-set-tcp-sack":
+            ensure  => $fai::ensure,
+            owner   => $fai::params::configdir_owner,
+            group   => $fai::params::admingroup,
+            mode    => $fai::params::hookfile_mode,
+            content => template('fai/nfsroot-hooks/set-tcp-sack.erb'),
+            require => File[$fai::params::nfsroot_hookdir]
+        }
+
         file { '/root/bin/faiplay':
             ensure  => $fai::ensure,
             group   => $fai::params::admingroup,
