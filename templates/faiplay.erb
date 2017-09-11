@@ -913,7 +913,7 @@ set_config() {
             -l | --localboot | localboot) function="configure_localdisk_boot";;
             --bcs)
                 LIVE_NETDEV="eth0";
-                APPEND_KERNEL_PARAM="${APPEND_KERNEL_PARAM} mem=1024M pci=nommconf" ;;
+                APPEND_KERNEL_PARAM="${APPEND_KERNEL_PARAM} pci=nommconf" ;;
             --live-netdev)
                 shift;
                 LIVE_NETDEV="$1";;
