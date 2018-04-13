@@ -17,7 +17,7 @@ class fai::common::debian inherits fai::common {
         group   => $fai::params::admingroup,
         mode    => $fai::params::hookfile_mode,
         content => template('fai/nfsroot-hooks/patch-initrd.erb'),
-        require => File[$fai::params::nfsroot_hookdir]
+        require => File[$fai::params::nfsroot_hookdir],
     }
 
     if ( $::lsbdistcodename == 'wheezy' ) {
@@ -31,7 +31,7 @@ class fai::common::debian inherits fai::common {
                         Package['FAI'],
                         File[$fai::configspacedir],
                         File[$fai::nfsrootdir],
-                      ]
+                      ],
         }
 
         # Hack for the delta node (gaia-80)
@@ -41,14 +41,14 @@ class fai::common::debian inherits fai::common {
             group   => $fai::params::admingroup,
             mode    => $fai::params::hookfile_mode,
             content => template('fai/nfsroot-hooks/download-mpt3sas.erb'),
-            require => File[$fai::params::nfsroot_hookdir]
+            require => File[$fai::params::nfsroot_hookdir],
         }
 
         # Ugly hack, cf http://blog.gmane.org/gmane.linux.debian.fai/month=20150901
         exec { "sed -i 's/localboot 0/localboot -1/' /usr/sbin/fai-chboot":
             path    => '/usr/bin:/usr/sbin:/bin',
             unless  => "grep 'localboot -1' /usr/sbin/fai-chboot",
-            require => Package['FAI']
+            require => Package['FAI'],
         }
 
 
@@ -61,7 +61,7 @@ class fai::common::debian inherits fai::common {
         group   => $fai::params::admingroup,
         mode    => $fai::params::hookfile_mode,
         content => template('fai/nfsroot-hooks/download-mlx4.erb'),
-        require => File[$fai::params::nfsroot_hookdir]
+        require => File[$fai::params::nfsroot_hookdir],
     }
 
     # Ugly hack, cf debian bug #731244
@@ -69,7 +69,7 @@ class fai::common::debian inherits fai::common {
     exec { "sed -i 's/root=/root=${::ipaddress}:/' /usr/sbin/fai-chboot":
         path    => '/usr/bin:/usr/sbin:/bin',
         unless  => "grep root=${::ipaddress} /usr/sbin/fai-chboot",
-        require => Package['FAI']
+        require => Package['FAI'],
     }
     apt::source { 'fai':
       location => 'http://fai-project.org/download',
@@ -77,7 +77,7 @@ class fai::common::debian inherits fai::common {
       repos    => 'koeln',
       key      => {
         'id'     => 'B11EE3273F6B2DEB528C93DA2BF8D9FE074BCDE4',
-        'source' => 'http://fai-project.org/download/074BCDE4.asc'
+        'source' => 'http://fai-project.org/download/074BCDE4.asc',
       },
     } -> Package['FAI']
 
