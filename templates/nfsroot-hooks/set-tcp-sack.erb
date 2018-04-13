@@ -1,6 +1,6 @@
 #!/bin/bash
 ################################################################################
-# <%= scope.lookupvar('fai::params::nfsroot_hookdir') %>/21-download-mlx4
+# <%= scope.lookupvar('fai::params::nfsroot_hookdir') %>/50-set-tcp-sack
 #
 #       _   _ _____ ____  ____   ___   ___ _____   _   _             _
 #      | \ | |  ___/ ___||  _ \ / _ \ / _ \_   _| | | | | ___   ___ | | __
@@ -18,29 +18,14 @@
 #      puppet invocation
 ################################################################################
 
-echo "*** Enter download-mlx4 hook ***"
+echo "*** Enter set_tcp_sack hook ***"
 
-mkdir ${NFSROOT}/tmp/mlx
-cd ${NFSROOT}/tmp/mlx
-echo "=> downloading mellanox debs"
-
-wget -q https://www.dropbox.com/s/4vf7zkqenzrhbfy/mlnx-en-dkms_3.3-1.0.0.0.0.gf583963_all.deb
-wget -q https://www.dropbox.com/s/i4d28irrvqkkymn/mlnx-en-utils_3.3-1.0.0.0.0.gf583963_amd64.deb
-
-sha256sum -c <<< "fcffda638bd789561dc5b4b30e6703fb92f517fe76fe86a5a4c528baa5926c69  mlnx-en-dkms_3.3-1.0.0.0.0.gf583963_all.deb
-                  248fab4d7579fabf06e577794eab966b37e02fe275649c6ba7587c6db6297092  mlnx-en-utils_3.3-1.0.0.0.0.gf583963_amd64.deb"
+echo net.ipv4.tcp_sack=0 > ${NFSROOT}/etc/sysctl.d/net.ipv4.tcp_sack.conf
 
 if [[ "$?" != 0 ]] ; then
-  echo "=> Integrity check failed, exiting"
+  rm -f $MODFILE
   exit 1
 else
   echo "=> Integrity check passed"
 fi
 
-
-echo "=> installing prerequisites"
-${ROOTCMD} apt-get install -y lsb-release dkms make linux-headers-amd64
-
-echo "=> installing mellanox debs"
-${ROOTCMD} dpkg -i /tmp/mlx/mlnx-en-utils_3.3-1.0.0.0.0.gf583963_amd64.deb
-${ROOTCMD} dpkg -i /tmp/mlx/mlnx-en-dkms_3.3-1.0.0.0.0.gf583963_all.deb

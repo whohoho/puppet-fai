@@ -9,7 +9,7 @@
 
 Configure and manage the Fully Automatic Installation (FAI) system
 
-      Copyright (c) 2016 S. Varrette, H. Cartiaux, V. Plugaru, S. Diehl aka. UL HPC Management Team <hpc-sysadmins@uni.lu>
+      Copyright (c) 2018 UL HPC Team <hpc-sysadmins@uni.lu>
       
 
 | [Project Page](https://github.com/ULHPC/puppet-fai) | [Sources](https://github.com/ULHPC/puppet-fai) | [Documentation](https://ulhpc-puppet-fai.readthedocs.org/en/latest/) | [Issues](https://github.com/ULHPC/puppet-fai/issues) |
