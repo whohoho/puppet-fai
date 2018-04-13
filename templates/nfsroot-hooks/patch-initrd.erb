@@ -20,7 +20,7 @@
 
 echo "*** Enter patch initrd hook ***"
 
-TARGET_KERNEL_VERSION=`basename ${NFSROOT}/boot/initrd.img-* | sed "s/initrd\.img-//"`
+TARGET_KERNEL_VERSION=`basename $(ls -1 ${NFSROOT}/boot/initrd.img-* | grep -v old-dkms | tail -n 1) | sed "s/initrd\.img-//"`
 echo "target kernel = ${TARGET_KERNEL_VERSION}"
 INITRDFILE="/boot/initrd.img-${TARGET_KERNEL_VERSION}"
 MISCDIR=/lib/modules/${TARGET_KERNEL_VERSION}/misc
