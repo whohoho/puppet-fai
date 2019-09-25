@@ -69,11 +69,11 @@ class fai::common {
     package { 'FAI':
         ensure  => $fai::ensure,
         name    => $fai::params::packagename,
-        require => Mount[$fai::debmirror_mountdir],
+        #FIXME require => Mount[$fai::debmirror_mountdir],
     }
     package { $fai::params::extra_packages:
         ensure  => $fai::ensure,
-        require => Mount[$fai::debmirror_mountdir],
+        #FIXME require => Mount[$fai::debmirror_mountdir],
     }
 
     # Create the group
