@@ -49,20 +49,23 @@ class fai::common {
                               ],
     }
 
-    # Ensure the local Debmirror is mounted
-    exec { "mkdir -p ${fai::debmirror_mountdir}":
-        path   => [ '/bin', '/usr/bin' ],
-        unless => "test -d ${fai::debmirror_mountdir}",
-    }
-    mount { $fai::debmirror_mountdir:
-        ensure  => 'mounted',
-        device  => "${fai::debmirror}:${fai::debmirror_exportdir}",
-        atboot  => true,
-        fstype  => 'nfs',
-        options => 'async,defaults,auto,nfsvers=3,tcp,ro',
-        require => Exec["mkdir -p ${fai::debmirror_mountdir}"],
-    }
 
+    if $fai::usedebmirror == true {
+
+      # Ensure the local Debmirror is mounted
+      exec { "mkdir -p ${fai::debmirror_mountdir}":
+          path   => [ '/bin', '/usr/bin' ],
+          unless => "test -d ${fai::debmirror_mountdir}",
+      }
+      mount { $fai::debmirror_mountdir:
+          ensure  => 'mounted',
+          device  => "${fai::debmirror}:${fai::debmirror_exportdir}",
+          atboot  => true,
+          fstype  => 'nfs',
+          options => 'async,defaults,auto,nfsvers=3,tcp,ro',
+          require => Exec["mkdir -p ${fai::debmirror_mountdir}"],
+      }
+    }
     package { 'FAI':
         ensure  => $fai::ensure,
         name    => $fai::params::packagename,
